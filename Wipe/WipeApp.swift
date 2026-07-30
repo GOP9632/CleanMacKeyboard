@@ -2,6 +2,13 @@ import SwiftUI
 
 @main
 struct WipeApp: App {
+    /// 整個 app 只有一個清潔流程控制器，組裝在這裡。
+    ///
+    /// 現在插的是乾跑那一組替身：時鐘與音效是真的，輸入攔截器什麼都不做，
+    /// 所以整個階段流程跑得完，但不會真的鎖住鍵盤。接上真正的攔截是 #11，
+    /// 換掉的只有這一行裡的那個替身（見 docs/seams.md）。
+    @State private var controller = CleaningFlowController.dryRun()
+
     // 這裡刻意沒有 tint。強調色由資源目錄裡的全域強調色資源決定
     // （見 Config/Wipe.xcconfig 與 WipeColor.globalAccentAssetName），
     // 這樣每一個場景都吃得到同一個固定青色，不會漏掉哪一個。
@@ -9,7 +16,7 @@ struct WipeApp: App {
         // 用 Window 而不是 WindowGroup：Wipe 只有一個常駐視窗，
         // 不需要「新增視窗」，也不需要多開一份。
         Window(WipeText.appName.localizedKey, id: Self.mainWindowID) {
-            MainWindowView()
+            MainWindowView(controller: controller)
         }
         .windowResizability(.contentSize)
 

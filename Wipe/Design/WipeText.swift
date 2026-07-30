@@ -12,6 +12,8 @@ enum WipeText: String, CaseIterable {
     case ringPreparingSeconds = "ring.preparing.seconds"
     case ringCleaningTitle = "ring.cleaning.title"
 
+    case mainTimeoutRemaining = "main.timeout.remaining"
+
     case settingsPlaceholderTitle = "settings.placeholder.title"
     case settingsPlaceholderDetail = "settings.placeholder.detail"
 
