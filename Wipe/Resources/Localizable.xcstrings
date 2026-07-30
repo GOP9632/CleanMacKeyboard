@@ -19,6 +19,222 @@
         }
       }
     },
+    "diagnostics.headline": {
+      "comment": "診斷視窗的標題行，說明這個畫面要回答什麼問題。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can Wipe tell the two Command keys apart?"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wipe 分得出左右兩顆 Command 嗎？"
+          }
+        }
+      }
+    },
+    "diagnostics.instructions": {
+      "comment": "診斷視窗的操作說明。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep this window in front, then hold the left Command key and watch which light comes on. Repeat with the right one."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讓這個視窗留在最前面，按住左邊的 Command，看哪一顆燈亮起來。再用右邊的按一次。"
+          }
+        }
+      }
+    },
+    "diagnostics.left.command": {
+      "comment": "左 Command 指示燈的名稱。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left Command"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左 Command"
+          }
+        }
+      }
+    },
+    "diagnostics.log.clear": {
+      "comment": "清空診斷紀錄的按鈕。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空"
+          }
+        }
+      }
+    },
+    "diagnostics.log.copy": {
+      "comment": "把整份診斷紀錄複製起來的按鈕，用途是貼回票上。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "複製"
+          }
+        }
+      }
+    },
+    "diagnostics.log.count": {
+      "comment": "診斷紀錄目前的筆數與上限。第一個數字是筆數，第二個是上限。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld of %2$lld entries kept"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留 %1$lld 筆，上限 %2$lld 筆"
+          }
+        }
+      }
+    },
+    "diagnostics.log.empty": {
+      "comment": "診斷紀錄還是空的時候顯示的文字。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No keyboard events yet."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒有收到任何鍵盤事件。"
+          }
+        }
+      }
+    },
+    "diagnostics.passthrough.note": {
+      "comment": "說明診斷畫面只讀取事件，不攔截也不修改。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This window only reads keyboard events while Wipe is in front. It never blocks or changes them, and it needs no system permission."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個視窗只在 Wipe 位於前景時讀取鍵盤事件。它不攔截也不修改任何事件，也不需要任何系統授權。"
+          }
+        }
+      }
+    },
+    "diagnostics.right.command": {
+      "comment": "右 Command 指示燈的名稱。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Right Command"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右 Command"
+          }
+        }
+      }
+    },
+    "diagnostics.state.down": {
+      "comment": "指示燈的狀態：這顆鍵正被按著。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Held down"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按著"
+          }
+        }
+      }
+    },
+    "diagnostics.state.up": {
+      "comment": "指示燈的狀態：這顆鍵沒有被按著。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Released"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放開"
+          }
+        }
+      }
+    },
+    "diagnostics.window.title": {
+      "comment": "診斷視窗的標題，也是它在「視窗」選單裡的名稱。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keyboard diagnostics"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鍵盤診斷"
+          }
+        }
+      }
+    },
     "ring.cleaning.title": {
       "comment": "清潔模式期間圓環中央的文字。排版寬度以英文長度為基準。",
       "extractionState": "manual",

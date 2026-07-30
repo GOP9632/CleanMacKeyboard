@@ -17,6 +17,18 @@ struct AppShellTests {
         #expect(item != nil, "選單裡找不到 Cmd + , 的項目")
     }
 
+    #if DEBUG
+    @Test("Debug 建置的選單裡叫得出診斷視窗")
+    func keyboardDiagnosticsWindowIsReachable() throws {
+        // 真機驗證要靠使用者自己打開這個視窗（見 #3），所以它必須找得到。
+        // 這個測試跟診斷視窗本身一樣是暫時的，答案拿到之後一起拆掉。
+        let mainMenu = try #require(NSApp.mainMenu)
+        let title = WipeText.diagnosticsWindowTitle.localized
+        let item = Self.firstItem(in: mainMenu) { $0.title == title }
+        #expect(item != nil, "選單裡找不到「\(title)」")
+    }
+    #endif
+
     @Test("是一個普通 app，不是選單列常駐程式")
     func isRegularApp() {
         // 這一版沒有選單列常駐圖示，只有一個普通 app 視窗。

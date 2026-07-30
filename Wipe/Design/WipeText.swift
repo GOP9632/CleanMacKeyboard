@@ -15,6 +15,20 @@ enum WipeText: String, CaseIterable {
     case settingsPlaceholderTitle = "settings.placeholder.title"
     case settingsPlaceholderDetail = "settings.placeholder.detail"
 
+    // 診斷畫面的文字。這一整組會跟著診斷視窗一起被拆掉（見 #3）。
+    case diagnosticsWindowTitle = "diagnostics.window.title"
+    case diagnosticsHeadline = "diagnostics.headline"
+    case diagnosticsInstructions = "diagnostics.instructions"
+    case diagnosticsLeftCommand = "diagnostics.left.command"
+    case diagnosticsRightCommand = "diagnostics.right.command"
+    case diagnosticsStateDown = "diagnostics.state.down"
+    case diagnosticsStateUp = "diagnostics.state.up"
+    case diagnosticsLogEmpty = "diagnostics.log.empty"
+    case diagnosticsLogCopy = "diagnostics.log.copy"
+    case diagnosticsLogClear = "diagnostics.log.clear"
+    case diagnosticsLogCount = "diagnostics.log.count"
+    case diagnosticsPassThroughNote = "diagnostics.passthrough.note"
+
     var key: String { rawValue }
 
     var localizedKey: LocalizedStringKey { LocalizedStringKey(rawValue) }

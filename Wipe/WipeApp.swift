@@ -13,6 +13,17 @@ struct WipeApp: App {
         }
         .windowResizability(.contentSize)
 
+        // 真機驗證用的診斷視窗（見 T2，#3）。它不隨 app 啟動打開，
+        // 使用者要自己從「視窗」選單叫出來。
+        //
+        // 只在 Debug 建置裡存在。這不是產品的一部分：「左右 Command 分不分得開」
+        // 有了答案之後整塊會被拆掉，在那之前也不該出現在任何交出去的建置裡。
+        #if DEBUG
+        Window(WipeText.diagnosticsWindowTitle.localizedKey, id: Self.keyboardDiagnosticsWindowID) {
+            KeyboardDiagnosticsView()
+        }
+        #endif
+
         // 這個場景就是 Cmd + , 的來源，內容目前是空的（見 T5，#6）。
         Settings {
             SettingsView()
@@ -20,4 +31,5 @@ struct WipeApp: App {
     }
 
     static let mainWindowID = "main"
+    static let keyboardDiagnosticsWindowID = "keyboard-diagnostics"
 }
