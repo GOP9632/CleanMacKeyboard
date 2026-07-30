@@ -1,0 +1,18 @@
+// 測試 target 的設定。
+//
+// 跟 Wipe.xcconfig 一樣，刻意不 #include Common.xcconfig，
+// 共用設定由專案層的 Debug.xcconfig / Release.xcconfig 提供。
+
+PRODUCT_NAME = $(TARGET_NAME)
+PRODUCT_MODULE_NAME = WipeTests
+PRODUCT_BUNDLE_IDENTIFIER = com.anthonyliu.wipe.tests
+
+GENERATE_INFOPLIST_FILE = YES
+
+// 測試掛在 app 上跑，這樣測試裡的 Bundle.wipe 就是真正打包出來的 Wipe.app，
+// 顏色資源、雙語字串、選單這些東西才驗得到使用者實際會拿到的那一份。
+TEST_HOST = $(BUILT_PRODUCTS_DIR)/Wipe.app/Contents/MacOS/Wipe
+BUNDLE_LOADER = $(TEST_HOST)
+
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks @loader_path/../Frameworks
+SWIFT_EMIT_LOC_STRINGS = NO

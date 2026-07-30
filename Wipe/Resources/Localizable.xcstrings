@@ -1,0 +1,132 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "app.name": {
+      "comment": "產品名稱，兩種語言都不翻。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wipe"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wipe"
+          }
+        }
+      }
+    },
+    "ring.cleaning.title": {
+      "comment": "清潔模式期間圓環中央的文字。排版寬度以英文長度為基準。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cleaning"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清潔中"
+          }
+        }
+      }
+    },
+    "ring.preparing.seconds": {
+      "comment": "緩衝倒數的剩餘秒數，顯示在圓環中央標題底下。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld s"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 秒"
+          }
+        }
+      }
+    },
+    "ring.preparing.title": {
+      "comment": "準備清潔期間圓環中央的文字，此時還沒開始攔截。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get ready"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "準備清潔"
+          }
+        }
+      }
+    },
+    "ring.standby.title": {
+      "comment": "待命時圓環中央的文字。這是最長的英文中央文字，圓環的文字寬度以它為準。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start cleaning"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始清潔"
+          }
+        }
+      }
+    },
+    "settings.placeholder.detail": {
+      "comment": "設定視窗還是空的時候顯示的說明。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The general and sound tabs arrive with the settings ticket."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一般與聲音兩個頁籤會跟設定那張票一起加入。"
+          }
+        }
+      }
+    },
+    "settings.placeholder.title": {
+      "comment": "設定視窗還是空的時候顯示的標題。",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to set yet"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前沒有可以調整的項目"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
