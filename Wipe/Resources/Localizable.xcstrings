@@ -1,366 +1,366 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "app.name": {
-      "comment": "產品名稱，兩種語言都不翻。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wipe"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "app.name" : {
+      "comment" : "產品名稱，兩種語言都不翻。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wipe"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe"
           }
         }
       }
     },
-    "diagnostics.headline": {
-      "comment": "診斷視窗的標題行，說明這個畫面要回答什麼問題。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Can Wipe tell the two Command keys apart?"
+    "diagnostics.headline" : {
+      "comment" : "診斷視窗的標題行，說明這個畫面要回答什麼問題。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can Wipe tell the two Command keys apart?"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wipe 分得出左右兩顆 Command 嗎？"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe 分得出左右兩顆 Command 嗎？"
           }
         }
       }
     },
-    "diagnostics.instructions": {
-      "comment": "診斷視窗的操作說明。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep this window in front, then hold the left Command key and watch which light comes on. Repeat with the right one."
+    "diagnostics.instructions" : {
+      "comment" : "診斷視窗的操作說明。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep this window in front, then hold the left Command key and watch which light comes on. Repeat with the right one."
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "讓這個視窗留在最前面，按住左邊的 Command，看哪一顆燈亮起來。再用右邊的按一次。"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "讓這個視窗留在最前面，按住左邊的 Command，看哪一顆燈亮起來。再用右邊的按一次。"
           }
         }
       }
     },
-    "diagnostics.left.command": {
-      "comment": "左 Command 指示燈的名稱。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Left Command"
+    "diagnostics.left.command" : {
+      "comment" : "左 Command 指示燈的名稱。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left Command"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "左 Command"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左 Command"
           }
         }
       }
     },
-    "diagnostics.log.clear": {
-      "comment": "清空診斷紀錄的按鈕。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clear"
+    "diagnostics.log.clear" : {
+      "comment" : "清空診斷紀錄的按鈕。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "清空"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清空"
           }
         }
       }
     },
-    "diagnostics.log.copy": {
-      "comment": "把整份診斷紀錄複製起來的按鈕，用途是貼回票上。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copy"
+    "diagnostics.log.copy" : {
+      "comment" : "把整份診斷紀錄複製起來的按鈕，用途是貼回票上。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "複製"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複製"
           }
         }
       }
     },
-    "diagnostics.log.count": {
-      "comment": "診斷紀錄目前的筆數與上限。第一個數字是筆數，第二個是上限。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld of %2$lld entries kept"
+    "diagnostics.log.count" : {
+      "comment" : "診斷紀錄目前的筆數與上限。第一個數字是筆數，第二個是上限。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld of %2$lld entries kept"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保留 %1$lld 筆，上限 %2$lld 筆"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留 %1$lld 筆，上限 %2$lld 筆"
           }
         }
       }
     },
-    "diagnostics.log.empty": {
-      "comment": "診斷紀錄還是空的時候顯示的文字。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No keyboard events yet."
+    "diagnostics.log.empty" : {
+      "comment" : "診斷紀錄還是空的時候顯示的文字。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No keyboard events yet."
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "還沒有收到任何鍵盤事件。"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "還沒有收到任何鍵盤事件。"
           }
         }
       }
     },
-    "diagnostics.passthrough.note": {
-      "comment": "說明診斷畫面只讀取事件，不攔截也不修改。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This window only reads keyboard events while Wipe is in front. It never blocks or changes them, and it needs no system permission."
+    "diagnostics.passthrough.note" : {
+      "comment" : "說明診斷畫面只讀取事件，不攔截也不修改。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This window only reads keyboard events while Wipe is in front. It never blocks or changes them, and it needs no system permission."
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "這個視窗只在 Wipe 位於前景時讀取鍵盤事件。它不攔截也不修改任何事件，也不需要任何系統授權。"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這個視窗只在 Wipe 位於前景時讀取鍵盤事件。它不攔截也不修改任何事件，也不需要任何系統授權。"
           }
         }
       }
     },
-    "diagnostics.right.command": {
-      "comment": "右 Command 指示燈的名稱。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Right Command"
+    "diagnostics.right.command" : {
+      "comment" : "右 Command 指示燈的名稱。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right Command"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "右 Command"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右 Command"
           }
         }
       }
     },
-    "diagnostics.state.down": {
-      "comment": "指示燈的狀態：這顆鍵正被按著。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Held down"
+    "diagnostics.state.down" : {
+      "comment" : "指示燈的狀態：這顆鍵正被按著。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Held down"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "按著"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按著"
           }
         }
       }
     },
-    "diagnostics.state.up": {
-      "comment": "指示燈的狀態：這顆鍵沒有被按著。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Released"
+    "diagnostics.state.up" : {
+      "comment" : "指示燈的狀態：這顆鍵沒有被按著。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Released"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "放開"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放開"
           }
         }
       }
     },
-    "diagnostics.window.title": {
-      "comment": "診斷視窗的標題，也是它在「視窗」選單裡的名稱。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keyboard diagnostics"
+    "diagnostics.window.title" : {
+      "comment" : "診斷視窗的標題，也是它在「視窗」選單裡的名稱。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keyboard diagnostics"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "鍵盤診斷"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鍵盤診斷"
           }
         }
       }
     },
-    "main.timeout.remaining": {
-      "comment": "清潔模式期間顯示的逾時剩餘時間，%@ 是 分:秒。刻意放在圓環外面，不佔用圓環。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Auto-unlocks in %@"
+    "main.timeout.remaining" : {
+      "comment" : "清潔模式期間顯示的逾時剩餘時間，%@ 是 分:秒。刻意放在圓環外面，不佔用圓環。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto-unlocks in %@"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ 後自動解除"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 後自動解除"
           }
         }
       }
     },
-    "ring.cleaning.title": {
-      "comment": "清潔模式期間圓環中央的文字。排版寬度以英文長度為基準。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cleaning"
+    "ring.cleaning.title" : {
+      "comment" : "清潔模式期間圓環中央的文字。排版寬度以英文長度為基準。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleaning"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "清潔中"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清潔中"
           }
         }
       }
     },
-    "ring.preparing.seconds": {
-      "comment": "緩衝倒數的剩餘秒數，顯示在圓環中央標題底下。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld s"
+    "ring.preparing.seconds" : {
+      "comment" : "緩衝倒數的剩餘秒數，顯示在圓環中央標題底下。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld s"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 秒"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 秒"
           }
         }
       }
     },
-    "ring.preparing.title": {
-      "comment": "準備清潔期間圓環中央的文字，此時還沒開始攔截。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Get ready"
+    "ring.preparing.title" : {
+      "comment" : "準備清潔期間圓環中央的文字，此時還沒開始攔截。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get ready"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "準備清潔"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "準備清潔"
           }
         }
       }
     },
-    "ring.standby.title": {
-      "comment": "待命時圓環中央的文字。這是最長的英文中央文字，圓環的文字寬度以它為準。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start cleaning"
+    "ring.standby.title" : {
+      "comment" : "待命時圓環中央的文字。這是最長的英文中央文字，圓環的文字寬度以它為準。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start cleaning"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "開始清潔"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開始清潔"
           }
         }
       }
     },
-    "settings.placeholder.detail": {
-      "comment": "設定視窗還是空的時候顯示的說明。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The general and sound tabs arrive with the settings ticket."
+    "settings.placeholder.detail" : {
+      "comment" : "設定視窗還是空的時候顯示的說明。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The general and sound tabs arrive with the settings ticket."
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一般與聲音兩個頁籤會跟設定那張票一起加入。"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般與聲音兩個頁籤會跟設定那張票一起加入。"
           }
         }
       }
     },
-    "settings.placeholder.title": {
-      "comment": "設定視窗還是空的時候顯示的標題。",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nothing to set yet"
+    "settings.placeholder.title" : {
+      "comment" : "設定視窗還是空的時候顯示的標題。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to set yet"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "目前沒有可以調整的項目"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前沒有可以調整的項目"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
