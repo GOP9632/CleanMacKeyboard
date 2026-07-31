@@ -51,6 +51,20 @@ struct WipeSettingsTests {
         #expect(WipeSettings.timeoutSecondsRange.contains(WipeSettings.defaultTimeoutSeconds))
     }
 
+    @Test("解鎖手勢預設按住三秒，而且被夾在範圍內")
+    func unlockHoldSecondsIsClamped() {
+        #expect(WipeSettings().unlockHoldSeconds == 3)
+        #expect(WipeSettings(unlockHoldSeconds: 0).unlockHoldSeconds == WipeSettings.unlockHoldSecondsRange.lowerBound)
+        #expect(WipeSettings(unlockHoldSeconds: 999).unlockHoldSeconds == WipeSettings.unlockHoldSecondsRange.upperBound)
+
+        // 零秒的按住等於一按就開，抹布掃過兩顆 Command 就解鎖了。
+        #expect(WipeSettings.unlockHoldSecondsRange.lowerBound >= 1)
+
+        var settings = WipeSettings()
+        settings.unlockHoldSeconds = 999
+        #expect(settings.unlockHoldSeconds == WipeSettings.unlockHoldSecondsRange.upperBound)
+    }
+
     @Test("緩衝秒數也被夾在範圍內")
     func bufferSecondsIsClamped() {
         #expect(WipeSettings(bufferSeconds: 0).bufferSeconds == WipeSettings.bufferSecondsRange.lowerBound)

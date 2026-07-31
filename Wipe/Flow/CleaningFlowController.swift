@@ -8,10 +8,9 @@ import Observation
 /// 呼叫攔截 API。這些能力全部從外面注入進來，測試才有辦法把真實世界那一頭
 /// 拔掉換成替身。
 ///
-/// 這一版只做階段流程本身：待命、準備清潔、清潔中，以及逾時解鎖。
-/// 解鎖手勢是 #5，闔蓋與喚醒是 #7，安全輸入模式是 #8，真正的攔截是 #11。
-/// 那幾張票加的都是「離開清潔中的一條路」或「一個注入進來的訊號」，
-/// 不會改動這裡的骨架。
+/// 這一版做的是階段流程本身（待命、準備清潔、清潔中）、逾時解鎖，以及解鎖手勢。
+/// 闔蓋與喚醒是 #7，安全輸入模式是 #8，真正的攔截是 #11。那幾張票加的都是
+/// 「離開清潔中的一條路」或「一個注入進來的訊號」，不會改動這裡的骨架。
 @MainActor
 @Observable
 final class CleaningFlowController {
@@ -22,6 +21,7 @@ final class CleaningFlowController {
     var settings: WipeSettings
 
     @ObservationIgnored private let clock: WipeClock
+    @ObservationIgnored private let keyboard: KeyboardSignalSource
     @ObservationIgnored private let interceptor: InputInterceptor
     @ObservationIgnored private let sound: SoundOutput
 
@@ -37,16 +37,28 @@ final class CleaningFlowController {
     /// 準備清潔期間已經播到第幾聲。
     @ObservationIgnored private var preparingTicksPlayed = 0
 
+    /// 解鎖手勢目前按到哪裡。
+    ///
+    /// 它是 `@ObservationIgnored` 的：畫面上會動的是按住進度，而那個值算出來
+    /// 要靠 `elapsed`，清潔中每一格都在變，環自然會跟著重畫。
+    @ObservationIgnored private var gesture = UnlockGesture()
+
     init(
         settings: WipeSettings,
         clock: WipeClock,
+        keyboard: KeyboardSignalSource,
         interceptor: InputInterceptor,
         sound: SoundOutput
     ) {
         self.settings = settings
         self.clock = clock
+        self.keyboard = keyboard
         self.interceptor = interceptor
         self.sound = sound
+        // 鍵盤是推進來的，不是定期去讀的。理由見 `KeyboardSignalSource.onSignal`。
+        self.keyboard.onSignal = { [weak self] signal in
+            self?.keyboardSignalArrived(signal)
+        }
     }
 
     /// 乾跑用的組裝：真的跑完整個流程，但輸入攔截器什麼都不做。
@@ -56,6 +68,7 @@ final class CleaningFlowController {
         CleaningFlowController(
             settings: settings,
             clock: SystemClock(),
+            keyboard: LocalKeyboardSignalSource(),
             interceptor: DryRunInputInterceptor(),
             sound: SystemSoundOutput()
         )
@@ -89,6 +102,21 @@ final class CleaningFlowController {
         guard stage == .cleaning else { return nil }
         return Self.secondsRemaining(from: settings.timeoutSeconds - elapsed)
     }
+
+    /// 解鎖手勢按住了多少，0 到 1。清潔中的圓環畫的就是這個值。
+    ///
+    /// 環在清潔中**只**表達這一件事，不表達逾時：解鎖進度是使用者唯一需要
+    /// 盯著看的東西，兩者共用同一個環會讓人分不清哪一個在動。
+    var unlockHoldProgress: Double {
+        guard stage == .cleaning else { return 0 }
+        return gesture.progress(at: clockTimeAtLastTick, holdSeconds: settings.unlockHoldSeconds)
+    }
+
+    /// 上一格走完的時候是幾點。
+    ///
+    /// 刻意繞過 `clock.now` 而從 `elapsed` 推回去：`elapsed` 是會通知畫面重畫的
+    /// 那個值，直接問時鐘算出來的進度不會讓環動起來。
+    private var clockTimeAtLastTick: TimeInterval { stageStartedAt + elapsed }
 
     // MARK: - 使用者動作
 
@@ -134,11 +162,34 @@ final class CleaningFlowController {
         if let sound = exit.sound { self.sound.play(sound) }
     }
 
+    // MARK: - 解鎖手勢
+
+    /// 鍵盤送來一次事件。
+    ///
+    /// 只有清潔中的事件算數：手勢是「離開清潔模式」的動作，還沒進去的時候
+    /// 按住它不該累積任何進度，否則一進去就立刻解開。
+    private func keyboardSignalArrived(_ signal: KeyboardSignal) {
+        guard stage == .cleaning else { return }
+        switch gesture.observe(signal, at: clock.now) {
+        case .nothing:
+            break
+        case .detected:
+            // 使用者看不到螢幕時，這一聲代表「認到了，繼續按住」。
+            sound.play(.unlockGestureDetected)
+        case .reset:
+            // 沒有這一聲，使用者會白按滿三秒才發現剛才被歸零了。
+            sound.play(.unlockGestureReset)
+        }
+    }
+
     // MARK: - 階段轉換
 
     private func enterStandby() {
         stage = .standby
         clock.stopTicking()
+        // 待命不需要鍵盤。手勢只在清潔中有意義，其他時候放手，
+        // 順便把按著的鍵忘乾淨。
+        keyboard.stop()
         stageStartedAt = clock.now
         elapsed = 0
         preparingTicksPlayed = 0
@@ -154,7 +205,13 @@ final class CleaningFlowController {
 
     private func enterCleaning() {
         stage = .cleaning
+        // 每一次進入清潔中，手勢都從零開始。這一行是防呆：上一次的進度若被留著，
+        // 一進來就會立刻解開，那是這個 app 最不能發生的事。
+        gesture = UnlockGesture()
         beginTiming()
+        // 從這一刻起才聽鍵盤。進來之前按著什麼都不算，所以剛好按著兩顆 Command
+        // 進到清潔中也不會立刻解開。
+        keyboard.start()
         // 先真的開始攔截，再出聲。那一聲是「可以開始擦了」的許可，
         // 它響的時候鍵盤必須已經是鎖著的。
         interceptor.startIntercepting(scope: settings.interceptionScope)
@@ -201,6 +258,12 @@ final class CleaningFlowController {
     }
 
     private func advanceCleaning() {
+        // 手勢先問。兩件事撞在同一格時，使用者自己按滿的那條路優先，
+        // 出的聲音才對得上他剛剛做的事。
+        if gesture.isComplete(at: clock.now, holdSeconds: settings.unlockHoldSeconds) {
+            exitCleaning(.unlockGesture)
+            return
+        }
         guard elapsed + .clockTolerance >= settings.timeoutSeconds else { return }
         exitCleaning(.timedOut)
     }

@@ -17,7 +17,7 @@ struct CleaningFlowControllerTests {
 
     @Test("起步是待命，沒有攔截也沒有聲音")
     func startsInStandby() {
-        let harness = Harness()
+        let harness = CleaningFlowHarness()
         #expect(harness.controller.stage == .standby)
         #expect(harness.interceptor.wasEverAskedToIntercept == false)
         #expect(harness.sound.played.isEmpty)
@@ -28,7 +28,7 @@ struct CleaningFlowControllerTests {
 
     @Test("緩衝開啟時按下開始進入準備清潔，而不是直接攔截")
     func bufferEnabledEntersPreparing() {
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: true, bufferSeconds: 3))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: true, bufferSeconds: 3))
         harness.controller.start()
 
         #expect(harness.controller.stage == .preparing)
@@ -38,7 +38,7 @@ struct CleaningFlowControllerTests {
 
     @Test("緩衝關閉時按下開始直接進入清潔中")
     func bufferDisabledEntersCleaningImmediately() {
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: false))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false))
         harness.controller.start()
 
         #expect(harness.controller.stage == .cleaning)
@@ -48,7 +48,7 @@ struct CleaningFlowControllerTests {
 
     @Test("準備清潔期間圓環顯示剩餘秒數")
     func preparingShowsSecondsRemaining() {
-        let harness = Harness(settings: WipeSettings(bufferSeconds: 3))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferSeconds: 3))
         harness.controller.start()
         #expect(harness.controller.preparingSecondsRemaining == 3)
 
@@ -66,7 +66,7 @@ struct CleaningFlowControllerTests {
 
     @Test("準備清潔期間每秒播放一次音效")
     func preparingPlaysOneTickPerSecond() {
-        let harness = Harness(settings: WipeSettings(bufferSeconds: 3))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferSeconds: 3))
         harness.controller.start()
         // 第一聲在按下開始的當下，使用者不用等一秒才聽到回應。
         #expect(harness.sound.count(of: .preparingTick) == 1)
@@ -85,7 +85,7 @@ struct CleaningFlowControllerTests {
 
     @Test("倒數歸零進入清潔中，播放鎖上並要求攔截")
     func preparingFinishesIntoCleaning() {
-        let harness = Harness(settings: WipeSettings(bufferSeconds: 3))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferSeconds: 3))
         harness.controller.start()
         harness.clock.advance(by: 3)
 
@@ -97,7 +97,7 @@ struct CleaningFlowControllerTests {
 
     @Test("準備清潔期間按 Esc 回到待命，過程中從未要求攔截")
     func cancellingPreparingNeverIntercepts() {
-        let harness = Harness(settings: WipeSettings(bufferSeconds: 3))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferSeconds: 3))
         harness.controller.start()
         harness.clock.advance(by: 2)
 
@@ -113,7 +113,7 @@ struct CleaningFlowControllerTests {
 
     @Test("準備清潔期間再點一次圓環也是取消")
     func activatingRingDuringPreparingCancels() {
-        let harness = Harness()
+        let harness = CleaningFlowHarness()
         harness.controller.activateRing()
         #expect(harness.controller.stage == .preparing)
 
@@ -124,7 +124,7 @@ struct CleaningFlowControllerTests {
 
     @Test("回到待命之後不再佔著時鐘")
     func standbyStopsTheClock() {
-        let harness = Harness()
+        let harness = CleaningFlowHarness()
         harness.controller.start()
         #expect(harness.clock.isTicking)
 
@@ -136,7 +136,7 @@ struct CleaningFlowControllerTests {
 
     @Test("清潔中的圓環不可點擊")
     func cleaningRingIsNotClickable() {
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: false))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false))
         harness.controller.start()
 
         // 畫面那一層由 `RingPhase.allowsActivation` 擋著（見 RingPhaseTests），
@@ -148,7 +148,7 @@ struct CleaningFlowControllerTests {
 
     @Test("逾時剩餘時間以文字呈現，不佔用圓環")
     func timeoutRemainingDoesNotUseTheRing() {
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: false, timeoutSeconds: 60))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false, timeoutSeconds: 60))
         harness.controller.start()
 
         #expect(harness.controller.timeoutSecondsRemaining == 60)
@@ -162,7 +162,7 @@ struct CleaningFlowControllerTests {
 
     @Test("逾時後自動回到待命，解除攔截，並播放逾時音效")
     func timeoutReturnsToStandby() {
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: false, timeoutSeconds: 60))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false, timeoutSeconds: 60))
         harness.controller.start()
 
         harness.clock.advance(by: 59)
@@ -188,7 +188,7 @@ struct CleaningFlowControllerTests {
     @Test("逾時上限 15 分鐘也不需要真的等")
     func fifteenMinuteTimeoutNeedsNoWaiting() {
         let limit = WipeSettings.timeoutSecondsRange.upperBound
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: false, timeoutSeconds: limit))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false, timeoutSeconds: limit))
         harness.controller.start()
 
         harness.clock.advance(by: limit - 1)
@@ -201,7 +201,7 @@ struct CleaningFlowControllerTests {
 
     @Test("攔截範圍照設定走", arguments: InterceptionScope.allCases)
     func interceptionScopeFollowsSettings(_ scope: InterceptionScope) {
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: false, interceptionScope: scope))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false, interceptionScope: scope))
         harness.controller.start()
 
         #expect(harness.interceptor.requestedScopes == [scope])
@@ -214,7 +214,7 @@ struct CleaningFlowControllerTests {
         // 這一條刻意逐項走過 CleaningExit 的每一個 case，而不是只測逾時那一條。
         // 日後多一條離開的路徑就多一個 case，這個測試會自動涵蓋它，
         // 不需要有人記得回來補。
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: false))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false))
         harness.controller.start()
         #expect(harness.interceptor.activeScope != nil)
 
@@ -227,7 +227,7 @@ struct CleaningFlowControllerTests {
 
     @Test("重複要求離開清潔中不會重複解除")
     func exitingTwiceIsHarmless() {
-        let harness = Harness(settings: WipeSettings(bufferIsEnabled: false))
+        let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false))
         harness.controller.start()
 
         harness.controller.exitCleaning(.timedOut)
@@ -236,31 +236,5 @@ struct CleaningFlowControllerTests {
         #expect(harness.controller.stage == .standby)
         #expect(harness.interceptor.stopCount == 1)
         #expect(harness.sound.count(of: .timedOut) == 1)
-    }
-
-    // MARK: - 測試用的組裝
-
-    /// 把控制器與它的三個替身綁在一起，省得每個測試都抄一次。
-    @MainActor
-    private struct Harness {
-        let clock: TestClock
-        let interceptor: RecordingInputInterceptor
-        let sound: RecordingSoundOutput
-        let controller: CleaningFlowController
-
-        init(settings: WipeSettings = WipeSettings()) {
-            let clock = TestClock()
-            let interceptor = RecordingInputInterceptor()
-            let sound = RecordingSoundOutput()
-            self.clock = clock
-            self.interceptor = interceptor
-            self.sound = sound
-            self.controller = CleaningFlowController(
-                settings: settings,
-                clock: clock,
-                interceptor: interceptor,
-                sound: sound
-            )
-        }
     }
 }

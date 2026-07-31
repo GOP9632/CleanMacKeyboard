@@ -20,6 +20,9 @@ final class LocalKeyboardSignalSource: KeyboardSignalSource {
     private(set) var signal: KeyboardSignal = .idle
 
     @ObservationIgnored
+    var onSignal: ((KeyboardSignal) -> Void)?
+
+    @ObservationIgnored
     var onReading: ((KeyboardEventReading) -> Void)?
 
     @ObservationIgnored
@@ -85,6 +88,9 @@ final class LocalKeyboardSignalSource: KeyboardSignalSource {
             otherKeyIsDown: pressedKeyCodes.isEmpty == false
         )
 
+        // 每一次事件都交出去一次，即使狀態跟上一次一模一樣。解鎖手勢要靠
+        // 「這一次事件帶著第三顆鍵」來歸零，只在狀態變了才通知會漏掉按鍵重複。
+        onSignal?(signal)
         onReading?(reading)
         return event
     }

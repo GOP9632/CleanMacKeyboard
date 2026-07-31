@@ -12,6 +12,12 @@ struct WipeSettings: Equatable {
     /// 緩衝秒數的可調範圍。
     static let bufferSecondsRange: ClosedRange<Int> = 1...10
 
+    /// 解鎖手勢要按住幾秒的可調範圍。
+    ///
+    /// 下限一秒：零秒的按住等於一按就開，抹布掃過兩顆 Command 就解鎖了，
+    /// 而手勢存在的理由正是抹布做不到。上限十秒，再長就不是手勢而是懲罰。
+    static let unlockHoldSecondsRange: ClosedRange<TimeInterval> = 1...10
+
     /// 逾時的可調範圍。
     ///
     /// 上限 15 分鐘寫死，而且沒有「關閉」或「永不」這個選項可以選：
@@ -42,6 +48,15 @@ struct WipeSettings: Equatable {
         didSet { timeoutSeconds = Self.timeoutSecondsRange.clamping(timeoutSeconds) }
     }
 
+    /// 解鎖手勢要按住幾秒。超出範圍的值會被拉回範圍內。
+    ///
+    /// 這是使用者自己在安全與方便之間的取捨：按久一點，抹布誤解鎖的機會更低；
+    /// 按短一點，自己解鎖更輕鬆。它調的是體驗，不是保險，所以可調
+    /// （「第三顆按鍵就重新計時」那一條才是保險，見 ADR-0002）。
+    var unlockHoldSeconds: TimeInterval {
+        didSet { unlockHoldSeconds = Self.unlockHoldSecondsRange.clamping(unlockHoldSeconds) }
+    }
+
     /// 攔截範圍。切換是設定項，不是每次進入時詢問。
     var interceptionScope: InterceptionScope
 
@@ -49,13 +64,15 @@ struct WipeSettings: Equatable {
         bufferIsEnabled: Bool = true,
         bufferSeconds: Int = 3,
         timeoutSeconds: TimeInterval = defaultTimeoutSeconds,
+        unlockHoldSeconds: TimeInterval = 3,
         interceptionScope: InterceptionScope = .keyboard
     ) {
         self.bufferIsEnabled = bufferIsEnabled
-        // init 裡的指派不會觸發 didSet，所以這兩個要自己夾一次。
+        // init 裡的指派不會觸發 didSet，所以這三個要自己夾一次。
         // 舊版本存下的值若落在現在的範圍之外，就是在這裡被拉回來的（見 #6）。
         self.bufferSeconds = Self.bufferSecondsRange.clamping(bufferSeconds)
         self.timeoutSeconds = Self.timeoutSecondsRange.clamping(timeoutSeconds)
+        self.unlockHoldSeconds = Self.unlockHoldSecondsRange.clamping(unlockHoldSeconds)
         self.interceptionScope = interceptionScope
     }
 }

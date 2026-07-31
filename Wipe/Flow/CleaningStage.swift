@@ -24,9 +24,12 @@ enum CleaningStage: String, CaseIterable, Equatable {
 /// 所以「有沒有漏掉一條路」變成「這個列舉有沒有漏掉一個 case」，
 /// 而後者有測試逐項守著。
 ///
-/// 現在只有逾時一條。解鎖手勢（#5）、闔蓋與喚醒（#7）、安全輸入模式（#8）
-/// 之後會各加一個 case，加的時候不需要再想一次要不要解除攔截。
+/// 現在有解鎖手勢與逾時兩條。闔蓋與喚醒（#7）、安全輸入模式（#8）之後會各加
+/// 一個 case，加的時候不需要再想一次要不要解除攔截。
 enum CleaningExit: String, CaseIterable, Equatable {
+    /// 解鎖手勢完成。使用者自己按滿了設定的秒數。
+    case unlockGesture
+
     /// 逾時解鎖。時間到自動回到待命。
     case timedOut
 
@@ -36,6 +39,7 @@ enum CleaningExit: String, CaseIterable, Equatable {
     /// 而不是自己解開的。
     var sound: WipeSound? {
         switch self {
+        case .unlockGesture: .unlocked
         case .timedOut: .timedOut
         }
     }

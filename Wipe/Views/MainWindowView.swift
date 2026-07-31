@@ -37,9 +37,9 @@ struct MainWindowView: View {
                 progress: controller.preparingProgress
             )
         case .cleaning:
-            // 環在清潔中只表達解鎖手勢的按住進度，而手勢是 #5，所以現在恆為 0。
-            // 逾時剩餘時間刻意不畫在環上。
-            .cleaning(holdProgress: 0)
+            // 環在清潔中只表達解鎖手勢的按住進度。逾時剩餘時間刻意不畫在環上，
+            // 它在下面那行文字裡。
+            .cleaning(holdProgress: controller.unlockHoldProgress)
         }
     }
 

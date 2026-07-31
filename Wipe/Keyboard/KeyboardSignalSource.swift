@@ -12,6 +12,14 @@ struct KeyboardSignal: Equatable {
 
     /// 什麼都沒按。
     static let idle = KeyboardSignal()
+
+    /// 兩顆 Command 都按著，而且沒有夾帶其他修飾鍵。
+    ///
+    /// 這是解鎖手勢開始計時的條件。第三顆按鍵刻意不在這裡：那一條是以
+    /// 「按下」為觸發的歸零，不是持續成立的條件（見 `UnlockGesture`）。
+    var isHoldingBothCommands: Bool {
+        leftCommandIsDown && rightCommandIsDown && otherModifiersAreDown == false
+    }
 }
 
 /// 清潔流程控制器的鍵盤訊號來源。
@@ -22,6 +30,14 @@ struct KeyboardSignal: Equatable {
 protocol KeyboardSignalSource: AnyObject {
     /// 目前的鍵盤狀態。
     var signal: KeyboardSignal { get }
+
+    /// 每一次鍵盤事件都會被呼叫一次，帶著那一刻的狀態。
+    ///
+    /// 控制器走的是這條路而不是自己定期去讀 `signal`，因為解鎖手勢的「出現
+    /// 第三顆按鍵就重新計時」是一個**事件**，不是一個狀態：一顆被壓著不動的鍵
+    /// 只該歸零一次。定期讀狀態的話，那顆鍵只要壓著就會一直歸零，
+    /// 使用者會永遠解不開（見 `UnlockGesture`）。
+    var onSignal: ((KeyboardSignal) -> Void)? { get set }
 
     /// 每一次鍵盤事件都會被呼叫一次，帶著那次事件的原始判讀。
     ///

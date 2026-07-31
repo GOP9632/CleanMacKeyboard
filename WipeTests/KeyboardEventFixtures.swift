@@ -14,7 +14,9 @@ enum KeyboardFlags {
     static let leftCommand: UInt = 0x0010_0108
     static let rightCommand: UInt = 0x0010_0110
     static let bothCommands: UInt = 0x0010_0118
-    static let leftCommandWithCapsLock: UInt = 0x0011_0108
+    /// Caps Lock 亮著的那個位元。它是切換式的，亮著的時候每一次事件都帶著它。
+    static let capsLockBit: UInt = 0x0001_0000
+    static let leftCommandWithCapsLock: UInt = leftCommand | capsLockBit
     static let leftCommandWithShift: UInt = 0x0012_0102 | leftCommand
     /// macOS 替方向鍵一類的按鍵自己附上的兩個位元，不是使用者按的。
     static let leftCommandWithFunctionKeys: UInt = 0x00A0_0000 | leftCommand
