@@ -207,6 +207,101 @@ struct CleaningFlowControllerTests {
         #expect(harness.interceptor.requestedScopes == [scope])
     }
 
+    // MARK: - 音效開關
+
+    /// 一趟會經過大部分出聲時刻的流程。
+    ///
+    /// 倒數三聲、鎖上、認到手勢、被歸零、自己解開，然後再進去一次讓它逾時。
+    /// 七個時刻裡只有「拒絕進入」沒被走到，那條路要等安全輸入模式接上來（#8）。
+    static let noisySettings = WipeSettings(
+        bufferIsEnabled: true,
+        bufferSeconds: 3,
+        timeoutSeconds: 60,
+        unlockHoldSeconds: 3
+    )
+
+    static func runNoisyFlow(_ harness: CleaningFlowHarness) {
+        harness.controller.start()
+        harness.clock.advance(by: 3)
+
+        harness.keyboard.holdBothCommands()
+        harness.keyboard.pressThirdKey()
+        harness.keyboard.releaseEverything()
+
+        harness.keyboard.holdBothCommands()
+        harness.clock.advance(by: 3)
+
+        harness.controller.start()
+        harness.clock.advance(by: 3)
+        harness.clock.advance(by: 60)
+    }
+
+    @Test("這趟流程本來會出的聲音")
+    func theNoisyFlowIsActuallyNoisy() {
+        // 底下兩個測試都拿這一趟當基準，所以先確認它真的響過那幾聲，
+        // 否則「關掉之後沒響」會變成一句廢話。
+        let harness = CleaningFlowHarness(settings: Self.noisySettings)
+        Self.runNoisyFlow(harness)
+
+        #expect(Set(harness.sound.played) == [
+            .preparingTick,
+            .locked,
+            .unlockGestureDetected,
+            .unlockGestureReset,
+            .unlocked,
+            .timedOut,
+        ])
+    }
+
+    @Test("音效總開關關閉時完全不播放")
+    func masterSwitchSilencesEverything() {
+        var settings = Self.noisySettings
+        settings.sounds.isEnabled = false
+        let harness = CleaningFlowHarness(settings: settings)
+
+        Self.runNoisyFlow(harness)
+
+        #expect(harness.sound.played.isEmpty)
+        // 靜音只是不出聲，流程本身照跑。
+        #expect(harness.controller.stage == .standby)
+        #expect(harness.interceptor.stopCount == 2)
+    }
+
+    /// 這趟流程走得到的那幾個時刻。
+    ///
+    /// `.refused` 不在裡面：拒絕進入要等安全輸入模式接上來（#8）。把它也丟進
+    /// 參數裡的話，那一輪會變成比較兩個都不含它的集合，恆真而看起來有測到。
+    static let reachableSounds = WipeSound.allCases.filter { $0 != .refused }
+
+    @Test("個別關閉時只有那一個不播放", arguments: reachableSounds)
+    func mutingOneSoundSilencesOnlyThatOne(_ muted: WipeSound) {
+        let baseline = CleaningFlowHarness(settings: Self.noisySettings)
+        Self.runNoisyFlow(baseline)
+        let heard = Set(baseline.sound.played)
+
+        var settings = Self.noisySettings
+        settings.sounds[muted] = false
+        let harness = CleaningFlowHarness(settings: settings)
+        Self.runNoisyFlow(harness)
+
+        #expect(Set(harness.sound.played) == heard.subtracting([muted]))
+    }
+
+    @Test("倒數每一秒的聲音關掉之後一聲都不響")
+    func mutingTheTickSilencesEveryTick() {
+        // 這一聲會響很多次，只看「有沒有出現過」不夠：漏掉的可能是
+        // 第一聲以外的那幾聲。
+        var settings = WipeSettings(bufferIsEnabled: true, bufferSeconds: 3)
+        settings.sounds[.preparingTick] = false
+        let harness = CleaningFlowHarness(settings: settings)
+
+        harness.controller.start()
+        harness.clock.advance(by: 3)
+
+        #expect(harness.sound.count(of: .preparingTick) == 0)
+        #expect(harness.sound.played == [.locked])
+    }
+
     // MARK: - 不變條件
 
     @Test("任何離開清潔中的路徑都要求攔截器解除", arguments: CleaningExit.allCases)

@@ -17,9 +17,13 @@ final class CleaningFlowController {
     /// 目前階段。只有這個類別改得動它。
     private(set) var stage: CleaningStage = .standby
 
-    /// 設定值。改了之後從下一次進入清潔模式起生效。
-    var settings: WipeSettings
+    /// 目前的設定值。
+    ///
+    /// 控制器只讀不寫：設定是使用者從設定視窗改的，改動走
+    /// `WipeSettingsStore`，控制器每次要用的時候問一次最新的值。
+    var settings: WipeSettings { settingsStore.settings }
 
+    @ObservationIgnored private let settingsStore: WipeSettingsStore
     @ObservationIgnored private let clock: WipeClock
     @ObservationIgnored private let keyboard: KeyboardSignalSource
     @ObservationIgnored private let interceptor: InputInterceptor
@@ -44,13 +48,13 @@ final class CleaningFlowController {
     @ObservationIgnored private var gesture = UnlockGesture()
 
     init(
-        settings: WipeSettings,
+        settings store: WipeSettingsStore,
         clock: WipeClock,
         keyboard: KeyboardSignalSource,
         interceptor: InputInterceptor,
         sound: SoundOutput
     ) {
-        self.settings = settings
+        self.settingsStore = store
         self.clock = clock
         self.keyboard = keyboard
         self.interceptor = interceptor
@@ -61,12 +65,33 @@ final class CleaningFlowController {
         }
     }
 
+    /// 給一組值就好的組裝。測試與預覽用：設定只活在記憶體裡，不碰硬碟。
+    convenience init(
+        settings: WipeSettings,
+        clock: WipeClock,
+        keyboard: KeyboardSignalSource,
+        interceptor: InputInterceptor,
+        sound: SoundOutput
+    ) {
+        self.init(
+            settings: WipeSettingsStore(settings),
+            clock: clock,
+            keyboard: keyboard,
+            interceptor: interceptor,
+            sound: sound
+        )
+    }
+
     /// 乾跑用的組裝：真的跑完整個流程，但輸入攔截器什麼都不做。
     ///
     /// 乾跑不是第二個接縫，只是在同一個接縫換一組替身（見 `docs/seams.md`）。
-    static func dryRun(settings: WipeSettings = WipeSettings()) -> CleaningFlowController {
+    ///
+    /// 不給設定就用一組只活在記憶體裡的預設值，預覽用。這裡用 optional 而不是
+    /// 直接把 `WipeSettingsStore(WipeSettings())` 寫成預設值，是因為預設值的
+    /// 算式跑在 nonisolated 的位置，叫不動 `@MainActor` 的初始化。
+    static func dryRun(settings: WipeSettingsStore? = nil) -> CleaningFlowController {
         CleaningFlowController(
-            settings: settings,
+            settings: settings ?? WipeSettingsStore(WipeSettings()),
             clock: SystemClock(),
             keyboard: LocalKeyboardSignalSource(),
             interceptor: DryRunInputInterceptor(),
@@ -159,7 +184,19 @@ final class CleaningFlowController {
         guard stage == .cleaning else { return }
         interceptor.stopIntercepting()
         enterStandby()
-        if let sound = exit.sound { self.sound.play(sound) }
+        if let sound = exit.sound { play(sound) }
+    }
+
+    // MARK: - 出聲
+
+    /// 播放某一個時刻的音效，除非設定說這一聲要靜音。
+    ///
+    /// 控制器裡每一個會出聲的地方都走這一個函式，沒有例外。哪幾聲要靜音是
+    /// 設定的事，不是控制器的事（見 `docs/seams.md`），所以判斷只出現在
+    /// 這一行，其他地方照樣直說「現在該響哪一聲」。
+    private func play(_ sound: WipeSound) {
+        guard settings.sounds.plays(sound) else { return }
+        self.sound.play(sound)
     }
 
     // MARK: - 解鎖手勢
@@ -175,10 +212,10 @@ final class CleaningFlowController {
             break
         case .detected:
             // 使用者看不到螢幕時，這一聲代表「認到了，繼續按住」。
-            sound.play(.unlockGestureDetected)
+            play(.unlockGestureDetected)
         case .reset:
             // 沒有這一聲，使用者會白按滿三秒才發現剛才被歸零了。
-            sound.play(.unlockGestureReset)
+            play(.unlockGestureReset)
         }
     }
 
@@ -215,7 +252,7 @@ final class CleaningFlowController {
         // 先真的開始攔截，再出聲。那一聲是「可以開始擦了」的許可，
         // 它響的時候鍵盤必須已經是鎖著的。
         interceptor.startIntercepting(scope: settings.interceptionScope)
-        sound.play(.locked)
+        play(.locked)
     }
 
     /// 開始為新的階段計時。
@@ -253,7 +290,7 @@ final class CleaningFlowController {
         let due = min(Int(elapsed + .clockTolerance) + 1, settings.bufferSeconds)
         while preparingTicksPlayed < due {
             preparingTicksPlayed += 1
-            sound.play(.preparingTick)
+            play(.preparingTick)
         }
     }
 

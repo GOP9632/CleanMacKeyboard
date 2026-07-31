@@ -2,12 +2,24 @@ import SwiftUI
 
 @main
 struct WipeApp: App {
+    /// 使用者的設定，存在硬碟上的那一份。
+    ///
+    /// 設定視窗改它，控制器讀它，所以它必須是同一個實體：兩邊各拿一份的話，
+    /// 使用者改完設定得重開 app 才會生效。
+    @State private var store: WipeSettingsStore
+
     /// 整個 app 只有一個清潔流程控制器，組裝在這裡。
     ///
     /// 現在插的是乾跑那一組替身：時鐘與音效是真的，輸入攔截器什麼都不做，
     /// 所以整個階段流程跑得完，但不會真的鎖住鍵盤。接上真正的攔截是 #11，
     /// 換掉的只有這一行裡的那個替身（見 docs/seams.md）。
-    @State private var controller = CleaningFlowController.dryRun()
+    @State private var controller: CleaningFlowController
+
+    init() {
+        let store = WipeSettingsStore()
+        _store = State(initialValue: store)
+        _controller = State(initialValue: .dryRun(settings: store))
+    }
 
     // 這裡刻意沒有 tint。強調色由資源目錄裡的全域強調色資源決定
     // （見 Config/Wipe.xcconfig 與 WipeColor.globalAccentAssetName），
@@ -31,9 +43,9 @@ struct WipeApp: App {
         }
         #endif
 
-        // 這個場景就是 Cmd + , 的來源，內容目前是空的（見 T5，#6）。
+        // 這個場景就是 Cmd + , 的來源。
         Settings {
-            SettingsView()
+            SettingsView(store: store)
         }
     }
 

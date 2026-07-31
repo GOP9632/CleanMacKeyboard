@@ -14,8 +14,39 @@ enum WipeText: String, CaseIterable {
 
     case mainTimeoutRemaining = "main.timeout.remaining"
 
-    case settingsPlaceholderTitle = "settings.placeholder.title"
-    case settingsPlaceholderDetail = "settings.placeholder.detail"
+    case settingsTabGeneral = "settings.tab.general"
+    case settingsTabSound = "settings.tab.sound"
+
+    case settingsScopeTitle = "settings.scope.title"
+    case settingsScopeKeyboard = "settings.scope.keyboard"
+    case settingsScopeAllInput = "settings.scope.allInput"
+    case settingsScopeFootnote = "settings.scope.footnote"
+
+    case settingsBufferToggle = "settings.buffer.toggle"
+    case settingsBufferLength = "settings.buffer.length"
+    case settingsBufferFootnote = "settings.buffer.footnote"
+
+    case settingsPresentationTitle = "settings.presentation.title"
+    case settingsPresentationMainWindow = "settings.presentation.mainWindow"
+    case settingsPresentationOverlay = "settings.presentation.overlay"
+    case settingsPresentationFootnote = "settings.presentation.footnote"
+
+    case settingsUnlockHold = "settings.unlock.hold"
+    case settingsUnlockFootnote = "settings.unlock.footnote"
+
+    case settingsTimeoutTitle = "settings.timeout.title"
+    case settingsTimeoutFootnote = "settings.timeout.footnote"
+
+    case settingsSoundMaster = "settings.sound.master"
+    case settingsSoundIndividual = "settings.sound.individual"
+    case settingsSoundFootnote = "settings.sound.footnote"
+    case settingsSoundPreparingTick = "settings.sound.preparingTick"
+    case settingsSoundLocked = "settings.sound.locked"
+    case settingsSoundUnlockGestureDetected = "settings.sound.unlockGestureDetected"
+    case settingsSoundUnlockGestureReset = "settings.sound.unlockGestureReset"
+    case settingsSoundUnlocked = "settings.sound.unlocked"
+    case settingsSoundTimedOut = "settings.sound.timedOut"
+    case settingsSoundRefused = "settings.sound.refused"
 
     // 診斷畫面的文字。這一整組會跟著診斷視窗一起被拆掉（見 #3）。
     case diagnosticsWindowTitle = "diagnostics.window.title"

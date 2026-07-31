@@ -23,4 +23,35 @@ struct ClockTextTests {
     func negativeSecondsAreFloored() {
         #expect(ClockText.minutesAndSeconds(-1) == "0:00")
     }
+
+    // MARK: - 帶單位的長度（設定畫面用）
+
+    static let english = Locale(identifier: "en")
+    static let chinese = Locale(identifier: "zh-Hant")
+
+    @Test("整分鐘不會拖著一個「0 秒」")
+    func wholeMinutesHideTheZeroSeconds() {
+        // 交給 Foundation 排的目的之一就是這件事。設定畫面上的「5 分鐘」
+        // 若排成「5 分鐘 0 秒」會很難看。
+        let text = ClockText.duration(5 * 60, in: Self.english)
+        #expect(!text.contains("0 second"))
+        #expect(text != ClockText.duration(30, in: Self.english))
+    }
+
+    @Test("跟著語言走，不會中英混雜")
+    func followsTheGivenLocale() {
+        #expect(ClockText.duration(30, in: Self.english) != ClockText.duration(30, in: Self.chinese))
+    }
+
+    @Test("單複數交給 Foundation，不會排出 1 minutes")
+    func pluralsAreHandled() {
+        // 自己拼字串的話，字串目錄要為每一個單位各準備一組複數變化。
+        #expect(ClockText.duration(60, in: Self.english) != ClockText.duration(2 * 60, in: Self.english))
+        #expect(!ClockText.duration(60, in: Self.english).contains("minutes"))
+    }
+
+    @Test("負數當作零")
+    func negativeDurationIsFloored() {
+        #expect(ClockText.duration(-5, in: Self.english) == ClockText.duration(0, in: Self.english))
+    }
 }

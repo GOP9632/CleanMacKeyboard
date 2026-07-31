@@ -325,38 +325,488 @@
         }
       }
     },
-    "settings.placeholder.detail" : {
-      "comment" : "設定視窗還是空的時候顯示的說明。",
+    "settings.buffer.footnote" : {
+      "comment" : "準備清潔緩衝底下的說明，講這段倒數是留來做什麼的。",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The general and sound tabs arrive with the settings ticket."
+            "value" : "The countdown is your window to take your hands off the keyboard and pick up the cloth. Turn it off once you no longer need it."
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一般與聲音兩個頁籤會跟設定那張票一起加入。"
+            "value" : "這段倒數是留給你把手離開鍵盤、拿起抹布的時間。熟練之後可以關掉，按下開始就直接進入清潔模式。"
           }
         }
       }
     },
-    "settings.placeholder.title" : {
-      "comment" : "設定視窗還是空的時候顯示的標題。",
+    "settings.buffer.length" : {
+      "comment" : "準備清潔緩衝的長度，右邊接著秒數。",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nothing to set yet"
+            "value" : "Countdown"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目前沒有可以調整的項目"
+            "value" : "倒數長度"
+          }
+        }
+      }
+    },
+    "settings.buffer.toggle" : {
+      "comment" : "準備清潔緩衝的開關。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count down before locking"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鎖上之前先倒數"
+          }
+        }
+      }
+    },
+    "settings.presentation.footnote" : {
+      "comment" : "畫面呈現底下的說明，講兩個選項各自的用途。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The main window keeps its size and position and simply comes to the front while cleaning. The overlay also hides your work from the room, and its dark background makes the dust on the screen easy to see."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主視窗維持原本的大小和位置，清潔模式期間暫時置頂。遮蔽層還會擋住旁人的視線，深色底也讓螢幕上的灰塵看得見。"
+          }
+        }
+      }
+    },
+    "settings.presentation.mainWindow" : {
+      "comment" : "畫面呈現的第一個選項：只有原本那個視窗。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Main window"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主視窗"
+          }
+        }
+      }
+    },
+    "settings.presentation.overlay" : {
+      "comment" : "畫面呈現的第二個選項：每個螢幕鋪一層深色畫面。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark overlay on every display"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮蔽層蓋滿每一個螢幕"
+          }
+        }
+      }
+    },
+    "settings.presentation.title" : {
+      "comment" : "畫面呈現的選單標題。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On screen"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "畫面呈現"
+          }
+        }
+      }
+    },
+    "settings.scope.allInput" : {
+      "comment" : "攔截範圍的第二個選項：連觸控板與滑鼠一起攔截。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keyboard, trackpad and mouse"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全輸入鎖（連觸控板與滑鼠）"
+          }
+        }
+      }
+    },
+    "settings.scope.footnote" : {
+      "comment" : "攔截範圍底下的說明，講兩個選項各自的取捨。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keyboard only leaves the trackpad working, so there is always a way to ask for help that does not go through the keyboard. Locking everything lets you clean the palm rest and the trackpad too, at the cost of that escape route."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鍵盤鎖保留觸控板，永遠留著一條不靠鍵盤的求救路徑。全輸入鎖連掌托和觸控板都能放心擦，代價是少了那條路。"
+          }
+        }
+      }
+    },
+    "settings.scope.keyboard" : {
+      "comment" : "攔截範圍的第一個選項：只攔截鍵盤。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keyboard only"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鍵盤鎖（只攔截鍵盤）"
+          }
+        }
+      }
+    },
+    "settings.scope.title" : {
+      "comment" : "攔截範圍的選單標題。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interception scope"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "攔截範圍"
+          }
+        }
+      }
+    },
+    "settings.sound.footnote" : {
+      "comment" : "個別音效底下的說明，講哪幾聲最好留著。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked, unlock gesture detected and unlocked are the only thing telling you what is happening while you are not looking at the screen."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「鎖上」「偵測到解鎖手勢」「解鎖成功」是你沒在看螢幕時唯一的狀態來源，建議留著。"
+          }
+        }
+      }
+    },
+    "settings.sound.individual" : {
+      "comment" : "七個時刻各自開關的區塊標題。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Individual sounds"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各個時刻"
+          }
+        }
+      }
+    },
+    "settings.sound.locked" : {
+      "comment" : "音效時刻：真正鎖上的那一刻。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鎖上"
+          }
+        }
+      }
+    },
+    "settings.sound.master" : {
+      "comment" : "音效總開關。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play sounds"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放音效"
+          }
+        }
+      }
+    },
+    "settings.sound.preparingTick" : {
+      "comment" : "音效時刻：準備清潔倒數的每一秒。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Countdown tick"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "倒數的每一秒"
+          }
+        }
+      }
+    },
+    "settings.sound.refused" : {
+      "comment" : "音效時刻：拒絕進入清潔模式。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refused to start"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拒絕進入"
+          }
+        }
+      }
+    },
+    "settings.sound.timedOut" : {
+      "comment" : "音效時刻：逾時自動解除。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlocked automatically"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "逾時自動解除"
+          }
+        }
+      }
+    },
+    "settings.sound.unlockGestureDetected" : {
+      "comment" : "音效時刻：偵測到解鎖手勢。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock gesture detected"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "偵測到解鎖手勢"
+          }
+        }
+      }
+    },
+    "settings.sound.unlockGestureReset" : {
+      "comment" : "音效時刻：解鎖手勢的計時被歸零。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock gesture restarted"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解鎖手勢重新計時"
+          }
+        }
+      }
+    },
+    "settings.sound.unlocked" : {
+      "comment" : "音效時刻：使用者自己解鎖成功。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlocked"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解鎖成功"
+          }
+        }
+      }
+    },
+    "settings.tab.general" : {
+      "comment" : "設定視窗第一個頁籤的名字。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般"
+          }
+        }
+      }
+    },
+    "settings.tab.sound" : {
+      "comment" : "設定視窗第二個頁籤的名字。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sound"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聲音"
+          }
+        }
+      }
+    },
+    "settings.timeout.footnote" : {
+      "comment" : "逾時底下的說明。必須寫明它關不掉，以及為什麼（見 ADR-0002）。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This cannot be turned off, and fifteen minutes is as long as it goes. Your keyboard does nothing while cleaning mode is on, so if the unlock gesture ever fails to register, this countdown is the way back."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這一項關不掉，最長也只到 15 分鐘。清潔模式期間鍵盤是失效的，萬一解鎖手勢認不出來，這個倒數就是你回得去的那條路。"
+          }
+        }
+      }
+    },
+    "settings.timeout.title" : {
+      "comment" : "逾時自動解除的選單標題。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock automatically after"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動解除時間"
+          }
+        }
+      }
+    },
+    "settings.unlock.footnote" : {
+      "comment" : "解鎖手勢底下的說明。順帶說明第三顆按鍵會重新計時，而且那一條沒有開關。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold the left and right Command keys together for this long to leave cleaning mode. Longer is safer against a stray cloth, shorter is easier on your hands. Any third key pressed during the hold restarts the count, which is what keeps a cloth from unlocking Wipe, and that part cannot be turned off."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同時按住左右兩顆 Command 鍵這麼久，就會離開清潔模式。設久一點，抹布誤解鎖的機會更低；設短一點，自己解鎖更輕鬆。按住期間只要出現第三顆按鍵就會重新計時，那正是抹布解不開 Wipe 的原因，所以它沒有開關。"
+          }
+        }
+      }
+    },
+    "settings.unlock.hold" : {
+      "comment" : "解鎖手勢要按住多久，右邊接著秒數。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold both Command keys for"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解鎖手勢按住"
           }
         }
       }

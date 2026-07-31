@@ -3,7 +3,8 @@ import Foundation
 /// 控制器需要的設定值。
 ///
 /// 它是七個接縫裡最單純的一個：純粹的值，不需要假的實作，測試直接給一組
-/// 就好。設定畫面與持久化是 #6，這裡只負責「有哪些值、值的範圍在哪」。
+/// 就好。這裡只負責「有哪些值、值的範圍在哪」；存到硬碟上是
+/// `WipeSettingsStore` 的事，畫成畫面是 `SettingsView` 的事。
 ///
 /// 安全網不在這裡：逾時可以調長短但不能關，闔蓋解鎖與「第三顆鍵歸零」
 /// 根本沒有對應的欄位。設定只調整體驗，不拆保險
@@ -24,7 +25,7 @@ struct WipeSettings: Equatable {
     /// 型別上就是一個一定有值的秒數。這是 ADR-0002 在程式裡的樣子。
     ///
     /// 下限刻意低到 30 秒，因為開發版預設就是 30 秒。設定畫面提供給使用者
-    /// 的選項會是這個範圍的子集合（見 #6）。
+    /// 的選項是這個範圍的子集合，見 `SettingsOptions.timeoutSeconds`。
     static let timeoutSecondsRange: ClosedRange<TimeInterval> = 30...(15 * 60)
 
     #if DEBUG
@@ -60,20 +61,31 @@ struct WipeSettings: Equatable {
     /// 攔截範圍。切換是設定項，不是每次進入時詢問。
     var interceptionScope: InterceptionScope
 
+    /// 清潔模式期間畫面怎麼呈現。
+    var screenPresentation: ScreenPresentation
+
+    /// 七個時刻的音效開關。
+    var sounds: SoundSettings
+
     init(
         bufferIsEnabled: Bool = true,
         bufferSeconds: Int = 3,
         timeoutSeconds: TimeInterval = defaultTimeoutSeconds,
         unlockHoldSeconds: TimeInterval = 3,
-        interceptionScope: InterceptionScope = .keyboard
+        interceptionScope: InterceptionScope = .keyboard,
+        screenPresentation: ScreenPresentation = .mainWindow,
+        sounds: SoundSettings = SoundSettings()
     ) {
         self.bufferIsEnabled = bufferIsEnabled
         // init 裡的指派不會觸發 didSet，所以這三個要自己夾一次。
-        // 舊版本存下的值若落在現在的範圍之外，就是在這裡被拉回來的（見 #6）。
+        // 舊版本存下的值若落在現在的範圍之外，就是在這裡被拉回來的：
+        // `WipeSettingsStore` 讀完硬碟上的值之後一律走這個 init。
         self.bufferSeconds = Self.bufferSecondsRange.clamping(bufferSeconds)
         self.timeoutSeconds = Self.timeoutSecondsRange.clamping(timeoutSeconds)
         self.unlockHoldSeconds = Self.unlockHoldSecondsRange.clamping(unlockHoldSeconds)
         self.interceptionScope = interceptionScope
+        self.screenPresentation = screenPresentation
+        self.sounds = sounds
     }
 }
 

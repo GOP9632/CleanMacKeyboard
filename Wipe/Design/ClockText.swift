@@ -13,4 +13,17 @@ enum ClockText {
         let seconds = max(0, seconds)
         return String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
+
+    /// 把一段長度排成「3 秒」「5 分鐘」這種帶單位的樣子，給設定畫面用。
+    ///
+    /// 交給 Foundation 排而不是自己拼字串：單複數（`1 minute` 對 `2 minutes`）
+    /// 與單位的翻譯它本來就會，自己拼的話字串目錄裡要為每一個單位各準備
+    /// 一組複數變化，而那組東西沒有人會記得維護。
+    ///
+    /// 零的那一段會被藏起來，所以 300 秒排出來是「5 分鐘」，不是「5 分鐘 0 秒」。
+    static func duration(_ seconds: TimeInterval, in locale: Locale) -> String {
+        Duration.seconds(max(0, seconds)).formatted(
+            .units(allowed: [.minutes, .seconds], width: .wide).locale(locale)
+        )
+    }
 }
