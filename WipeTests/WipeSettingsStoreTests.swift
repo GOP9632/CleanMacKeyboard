@@ -150,6 +150,7 @@ struct WipeSettingsStoreTests {
             settings: store,
             clock: TestClock(),
             keyboard: FakeKeyboardSignalSource(),
+            machine: FakeMachineSignalSource(),
             interceptor: RecordingInputInterceptor(),
             sound: RecordingSoundOutput()
         )

@@ -120,6 +120,7 @@ struct UnlockGestureTests {
             ),
             clock: clock,
             keyboard: keyboard,
+            machine: FakeMachineSignalSource(),
             interceptor: interceptor,
             sound: sound
         )

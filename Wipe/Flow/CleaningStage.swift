@@ -24,8 +24,8 @@ enum CleaningStage: String, CaseIterable, Equatable {
 /// 所以「有沒有漏掉一條路」變成「這個列舉有沒有漏掉一個 case」，
 /// 而後者有測試逐項守著。
 ///
-/// 現在有解鎖手勢與逾時兩條。闔蓋與喚醒（#7）、安全輸入模式（#8）之後會各加
-/// 一個 case，加的時候不需要再想一次要不要解除攔截。
+/// 現在有四條：解鎖手勢、逾時，以及闔蓋解鎖的兩個訊號。安全輸入模式（#8）
+/// 之後會再加一個 case，加的時候不需要再想一次要不要解除攔截。
 enum CleaningExit: String, CaseIterable, Equatable {
     /// 解鎖手勢完成。使用者自己按滿了設定的秒數。
     case unlockGesture
@@ -33,14 +33,27 @@ enum CleaningExit: String, CaseIterable, Equatable {
     /// 逾時解鎖。時間到自動回到待命。
     case timedOut
 
+    /// 闔蓋解鎖的主要訊號：螢幕蓋子闔上。
+    case lidClosed
+
+    /// 闔蓋解鎖的次要訊號：系統從睡眠喚醒。
+    ///
+    /// 為什麼兩個訊號都要，見 `MachineSignal`。
+    case systemWoke
+
     /// 離開時要播的那一聲。`nil` 代表這條路徑不出聲。
     ///
     /// 逾時解除的聲音必須與解鎖成功不同，使用者才知道是保險跳掉了，
     /// 而不是自己解開的。
+    ///
+    /// 闔蓋與喚醒兩條不出聲。出聲的時刻是規格寫死的七個（見 #1），這兩條
+    /// 不在裡面：蓋子闔上的人看不到也多半聽不到螢幕那一邊發生什麼事，而
+    /// 喚醒之後畫面上就是待命，不需要一聲來解釋。
     var sound: WipeSound? {
         switch self {
         case .unlockGesture: .unlocked
         case .timedOut: .timedOut
+        case .lidClosed, .systemWoke: nil
         }
     }
 }

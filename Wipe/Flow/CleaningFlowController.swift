@@ -8,8 +8,8 @@ import Observation
 /// 呼叫攔截 API。這些能力全部從外面注入進來，測試才有辦法把真實世界那一頭
 /// 拔掉換成替身。
 ///
-/// 這一版做的是階段流程本身（待命、準備清潔、清潔中）、逾時解鎖，以及解鎖手勢。
-/// 闔蓋與喚醒是 #7，安全輸入模式是 #8，真正的攔截是 #11。那幾張票加的都是
+/// 這一版做的是階段流程本身（待命、準備清潔、清潔中）、逾時解鎖、解鎖手勢，
+/// 以及闔蓋解鎖。安全輸入模式是 #8，真正的攔截是 #11。那兩張票加的都是
 /// 「離開清潔中的一條路」或「一個注入進來的訊號」，不會改動這裡的骨架。
 @MainActor
 @Observable
@@ -26,6 +26,7 @@ final class CleaningFlowController {
     @ObservationIgnored private let settingsStore: WipeSettingsStore
     @ObservationIgnored private let clock: WipeClock
     @ObservationIgnored private let keyboard: KeyboardSignalSource
+    @ObservationIgnored private let machine: MachineSignalSource
     @ObservationIgnored private let interceptor: InputInterceptor
     @ObservationIgnored private let sound: SoundOutput
 
@@ -51,17 +52,22 @@ final class CleaningFlowController {
         settings store: WipeSettingsStore,
         clock: WipeClock,
         keyboard: KeyboardSignalSource,
+        machine: MachineSignalSource,
         interceptor: InputInterceptor,
         sound: SoundOutput
     ) {
         self.settingsStore = store
         self.clock = clock
         self.keyboard = keyboard
+        self.machine = machine
         self.interceptor = interceptor
         self.sound = sound
         // 鍵盤是推進來的，不是定期去讀的。理由見 `KeyboardSignalSource.onSignal`。
         self.keyboard.onSignal = { [weak self] signal in
             self?.keyboardSignalArrived(signal)
+        }
+        self.machine.onSignal = { [weak self] signal in
+            self?.machineSignalArrived(signal)
         }
     }
 
@@ -70,6 +76,7 @@ final class CleaningFlowController {
         settings: WipeSettings,
         clock: WipeClock,
         keyboard: KeyboardSignalSource,
+        machine: MachineSignalSource,
         interceptor: InputInterceptor,
         sound: SoundOutput
     ) {
@@ -77,6 +84,7 @@ final class CleaningFlowController {
             settings: WipeSettingsStore(settings),
             clock: clock,
             keyboard: keyboard,
+            machine: machine,
             interceptor: interceptor,
             sound: sound
         )
@@ -94,6 +102,7 @@ final class CleaningFlowController {
             settings: settings ?? WipeSettingsStore(WipeSettings()),
             clock: SystemClock(),
             keyboard: LocalKeyboardSignalSource(),
+            machine: SystemMachineSignalSource(),
             interceptor: DryRunInputInterceptor(),
             sound: SystemSoundOutput()
         )
@@ -219,6 +228,29 @@ final class CleaningFlowController {
         }
     }
 
+    // MARK: - 闔蓋解鎖
+
+    /// 機器送來一個訊號。
+    ///
+    /// 兩個訊號都直接離開清潔中，沒有第二種解讀。這是兩道不可關閉的保險之一
+    /// （見 ADR-0002），在全輸入鎖模式下尤其重要：那個模式連滑鼠都失效，
+    /// 闔上蓋子是使用者手指一定按得到的動作。
+    ///
+    /// 只有清潔中的訊號算數。待命與準備清潔都還沒攔截任何東西，沒有需要
+    /// 逃生的對象。
+    ///
+    /// 這裡的 switch 看起來像在做恆等映射，因為 `MachineSignal` 與
+    /// `CleaningExit` 剛好各有同名的兩個 case。兩個列舉刻意分開：一個是機器
+    /// 那一頭發生了什麼事，另一個是離開清潔中的路徑。安全輸入模式（#8）會讓
+    /// 後者多一個前者沒有的 case。
+    private func machineSignalArrived(_ signal: MachineSignal) {
+        guard stage == .cleaning else { return }
+        switch signal {
+        case .lidClosed: exitCleaning(.lidClosed)
+        case .systemWoke: exitCleaning(.systemWoke)
+        }
+    }
+
     // MARK: - 階段轉換
 
     private func enterStandby() {
@@ -227,6 +259,8 @@ final class CleaningFlowController {
         // 待命不需要鍵盤。手勢只在清潔中有意義，其他時候放手，
         // 順便把按著的鍵忘乾淨。
         keyboard.stop()
+        // 機器訊號同理：待命的時候闔上蓋子就只是闔上蓋子。
+        machine.stop()
         stageStartedAt = clock.now
         elapsed = 0
         preparingTicksPlayed = 0
@@ -249,6 +283,9 @@ final class CleaningFlowController {
         // 從這一刻起才聽鍵盤。進來之前按著什麼都不算，所以剛好按著兩顆 Command
         // 進到清潔中也不會立刻解開。
         keyboard.start()
+        // 從這一刻起才聽機器。進來之前蓋子是開是闔都不算，理由見
+        // `MachineSignalSource`。
+        machine.start()
         // 先真的開始攔截，再出聲。那一聲是「可以開始擦了」的許可，
         // 它響的時候鍵盤必須已經是鎖著的。
         interceptor.startIntercepting(scope: settings.interceptionScope)
