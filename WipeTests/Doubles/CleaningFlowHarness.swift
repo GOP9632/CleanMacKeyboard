@@ -2,7 +2,7 @@ import Foundation
 
 @testable import Wipe
 
-/// 把控制器與它的五個替身綁在一起，省得每個測試都抄一次。
+/// 把控制器與它的六個替身綁在一起，省得每個測試都抄一次。
 ///
 /// 控制器是這個專案唯一的自動化測試接縫（見 `docs/seams.md`），所以每一份
 /// 測試都是從這裡開始的：真實世界那一頭全部換成替身，跑的還是同一份程式碼。
@@ -11,6 +11,7 @@ struct CleaningFlowHarness {
     let clock: TestClock
     let keyboard: FakeKeyboardSignalSource
     let machine: FakeMachineSignalSource
+    let secureInput: FakeSecureInputProbe
     let interceptor: RecordingInputInterceptor
     let sound: RecordingSoundOutput
     let controller: CleaningFlowController
@@ -19,11 +20,13 @@ struct CleaningFlowHarness {
         let clock = TestClock()
         let keyboard = FakeKeyboardSignalSource()
         let machine = FakeMachineSignalSource()
+        let secureInput = FakeSecureInputProbe()
         let interceptor = RecordingInputInterceptor()
         let sound = RecordingSoundOutput()
         self.clock = clock
         self.keyboard = keyboard
         self.machine = machine
+        self.secureInput = secureInput
         self.interceptor = interceptor
         self.sound = sound
         self.controller = CleaningFlowController(
@@ -31,6 +34,7 @@ struct CleaningFlowHarness {
             clock: clock,
             keyboard: keyboard,
             machine: machine,
+            secureInput: secureInput,
             interceptor: interceptor,
             sound: sound
         )

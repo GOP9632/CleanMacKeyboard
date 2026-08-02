@@ -209,10 +209,10 @@ struct CleaningFlowControllerTests {
 
     // MARK: - 音效開關
 
-    /// 一趟會經過大部分出聲時刻的流程。
+    /// 一趟會經過全部七個出聲時刻的流程。
     ///
-    /// 倒數三聲、鎖上、認到手勢、被歸零、自己解開，然後再進去一次讓它逾時。
-    /// 七個時刻裡只有「拒絕進入」沒被走到，那條路要等安全輸入模式接上來（#8）。
+    /// 倒數三聲、鎖上、認到手勢、被歸零、自己解開，再進去一次讓它逾時，
+    /// 最後在安全輸入模式底下按一次開始換一聲拒絕。
     static let noisySettings = WipeSettings(
         bufferIsEnabled: true,
         bufferSeconds: 3,
@@ -234,6 +234,10 @@ struct CleaningFlowControllerTests {
         harness.controller.start()
         harness.clock.advance(by: 3)
         harness.clock.advance(by: 60)
+
+        harness.secureInput.turnOn()
+        harness.controller.start()
+        harness.secureInput.turnOff()
     }
 
     @Test("這趟流程本來會出的聲音")
@@ -250,6 +254,7 @@ struct CleaningFlowControllerTests {
             .unlockGestureReset,
             .unlocked,
             .timedOut,
+            .refused,
         ])
     }
 
@@ -269,9 +274,10 @@ struct CleaningFlowControllerTests {
 
     /// 這趟流程走得到的那幾個時刻。
     ///
-    /// `.refused` 不在裡面：拒絕進入要等安全輸入模式接上來（#8）。把它也丟進
-    /// 參數裡的話，那一輪會變成比較兩個都不含它的集合，恆真而看起來有測到。
-    static let reachableSounds = WipeSound.allCases.filter { $0 != .refused }
+    /// 現在七個都走得到，所以直接拿 `allCases`：日後多一個時刻而流程沒跟上，
+    /// 那一輪會變成比較兩個都不含它的集合，恆真而看起來有測到，這時
+    /// `theNoisyFlowIsActuallyNoisy` 會先失敗把它抓出來。
+    static let reachableSounds = WipeSound.allCases
 
     @Test("個別關閉時只有那一個不播放", arguments: reachableSounds)
     func mutingOneSoundSilencesOnlyThatOne(_ muted: WipeSound) {

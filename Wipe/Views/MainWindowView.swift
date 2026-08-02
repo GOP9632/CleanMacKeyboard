@@ -19,6 +19,7 @@ struct MainWindowView: View {
         VStack(spacing: Layout.spacing) {
             RingView(phase: ringPhase) { controller.activateRing() }
             timeoutLabel
+            refusalLabel
         }
         .padding(Layout.padding)
         .frame(minWidth: RingMetrics.diameter + Layout.padding * 2)
@@ -65,13 +66,46 @@ struct MainWindowView: View {
         return String(format: format, locale: locale, ClockText.minutesAndSeconds(remaining))
     }
 
+    /// 為什麼進不去清潔模式。
+    ///
+    /// 沒有東西擋著的時候整塊拿掉，不像逾時那樣留一行空白：這是例外狀態，
+    /// 難得出現一次，值得讓視窗變高一點來換使用者真的看到它。
+    ///
+    /// 這是 Wipe 誠實回報的那一面（見 ADR-0002）。使用者正是因為相信畫面上的
+    /// 狀態才敢閉著眼睛擦，所以「沒進去」不能只是安靜地什麼都沒發生。
+    @ViewBuilder
+    private var refusalLabel: some View {
+        if let refusalText {
+            Label(refusalText, systemImage: "exclamationmark.triangle.fill")
+                .font(.callout)
+                .foregroundStyle(WipeColor.warning.color)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: RingMetrics.diameter)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var refusalText: String? {
+        guard let refusal = controller.refusal else { return nil }
+        switch refusal {
+        case .secureInput(let appName):
+            // 查不出是哪個 app 的時候仍然說明狀況，只是少了那一句「去關掉誰」。
+            guard let appName else { return WipeText.mainRefusalSecureInput.localized(in: locale) }
+            let format = WipeText.mainRefusalSecureInputApp.localized(in: locale)
+            return String(format: format, locale: locale, appName)
+        }
+    }
+
     /// Esc 取消準備清潔。
     ///
     /// 用一顆看不見的按鈕，而不是 `onExitCommand`：按鈕的鍵盤快捷鍵註冊在
     /// 視窗上，不必先有哪個元件拿到焦點。只在準備清潔期間啟用，其他時候
     /// 這顆按鈕是停用的，Esc 照常交給系統處理。
+    ///
+    /// 標題給的是一個空的視圖而不是空字串：字串那一版會被 Xcode 當成一個
+    /// 要翻譯的文字抽進字串目錄，在裡面留下一個沒有鍵名的空條目。
     private var escapeShortcut: some View {
-        Button("", action: { controller.cancel() })
+        Button(action: { controller.cancel() }) { EmptyView() }
             .buttonStyle(.plain)
             .keyboardShortcut(.cancelAction)
             .disabled(controller.stage != .preparing)

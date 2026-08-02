@@ -235,6 +235,42 @@
         }
       }
     },
+    "main.refusal.secureInput" : {
+      "comment" : "拒絕進入清潔模式的理由：安全輸入模式啟動中，但查不出是哪個 app 造成的。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secure input is on, so Wipe cannot block the keyboard."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全輸入模式啟動中，Wipe 攔不住鍵盤。"
+          }
+        }
+      }
+    },
+    "main.refusal.secureInput.app" : {
+      "comment" : "拒絕進入清潔模式的理由，%@ 是造成安全輸入模式的 app 名稱。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ turned on secure input, so Wipe cannot block the keyboard."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 啟動了安全輸入模式，Wipe 攔不住鍵盤。"
+          }
+        }
+      }
+    },
     "main.timeout.remaining" : {
       "comment" : "清潔模式期間顯示的逾時剩餘時間，%@ 是 分:秒。刻意放在圓環外面，不佔用圓環。",
       "extractionState" : "manual",

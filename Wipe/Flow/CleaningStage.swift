@@ -24,8 +24,7 @@ enum CleaningStage: String, CaseIterable, Equatable {
 /// 所以「有沒有漏掉一條路」變成「這個列舉有沒有漏掉一個 case」，
 /// 而後者有測試逐項守著。
 ///
-/// 現在有四條：解鎖手勢、逾時，以及闔蓋解鎖的兩個訊號。安全輸入模式（#8）
-/// 之後會再加一個 case，加的時候不需要再想一次要不要解除攔截。
+/// 現在有五條：解鎖手勢、逾時、闔蓋解鎖的兩個訊號，以及偵測到安全輸入模式。
 enum CleaningExit: String, CaseIterable, Equatable {
     /// 解鎖手勢完成。使用者自己按滿了設定的秒數。
     case unlockGesture
@@ -41,10 +40,20 @@ enum CleaningExit: String, CaseIterable, Equatable {
     /// 為什麼兩個訊號都要，見 `MachineSignal`。
     case systemWoke
 
+    /// 偵測到安全輸入模式。
+    ///
+    /// 這條不是使用者要求的，也不是保險跳掉，而是 Wipe 承認自己攔不住了。
+    /// 清潔模式絕不在無法可靠攔截時維持（見 `CONTEXT.md` 的不變條件）。
+    case secureInput
+
     /// 離開時要播的那一聲。`nil` 代表這條路徑不出聲。
     ///
     /// 逾時解除的聲音必須與解鎖成功不同，使用者才知道是保險跳掉了，
     /// 而不是自己解開的。
+    ///
+    /// 安全輸入模式那一條借用「拒絕進入」的那一聲。兩者是同一件事的兩個
+    /// 時機：Wipe 攔不住，所以不做。這一聲非響不可，使用者這時正閉著眼睛擦，
+    /// 畫面已經不是他以為的那個了。
     ///
     /// 闔蓋與喚醒兩條不出聲。出聲的時刻是規格寫死的七個（見 #1），這兩條
     /// 不在裡面：蓋子闔上的人看不到也多半聽不到螢幕那一邊發生什麼事，而
@@ -53,6 +62,7 @@ enum CleaningExit: String, CaseIterable, Equatable {
         switch self {
         case .unlockGesture: .unlocked
         case .timedOut: .timedOut
+        case .secureInput: .refused
         case .lidClosed, .systemWoke: nil
         }
     }
