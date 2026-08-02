@@ -649,6 +649,24 @@
         }
       }
     },
+    "settings.sound.unlocked" : {
+      "comment" : "音效時刻：使用者自己解鎖成功。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlocked"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解鎖成功"
+          }
+        }
+      }
+    },
     "settings.sound.unlockGestureDetected" : {
       "comment" : "音效時刻：偵測到解鎖手勢。",
       "extractionState" : "manual",
@@ -681,24 +699,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "解鎖手勢重新計時"
-          }
-        }
-      }
-    },
-    "settings.sound.unlocked" : {
-      "comment" : "音效時刻：使用者自己解鎖成功。",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlocked"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "解鎖成功"
           }
         }
       }
