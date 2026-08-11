@@ -10,9 +10,9 @@ struct WipeApp: App {
 
     /// 整個 app 只有一個清潔流程控制器，組裝在這裡。
     ///
-    /// 現在插的是乾跑那一組替身：時鐘與音效是真的，輸入攔截器什麼都不做，
-    /// 所以整個階段流程跑得完，但不會真的鎖住鍵盤。接上真正的攔截是 #11，
-    /// 換掉的只有這一行裡的那個替身（見 docs/seams.md）。
+    /// 預設插的是真的攔截那一組（見 `CleaningFlowController.live(settings:)`）。
+    /// 開發建置可以用啟動參數 `-WipeDryRun YES` 換回乾跑那一組，換掉的只有
+    /// 插在接縫上的那幾個替身，控制器本身一行都不用改（見 docs/seams.md）。
     @State private var controller: CleaningFlowController
 
     /// 輔助使用授權的閘門。主視窗裡放圓環還是授權引導畫面由它決定。
@@ -24,7 +24,13 @@ struct WipeApp: App {
     init() {
         let store = WipeSettingsStore()
         _store = State(initialValue: store)
-        _controller = State(initialValue: .dryRun(settings: store))
+        // 乾跑與真攔截的取捨只在這一行上做，而且只在啟動時做一次：
+        // 跑到一半換掉攔截器，等於在使用者閉著眼睛擦機器的時候抽掉他腳下的地板。
+        _controller = State(
+            initialValue: WipeLaunchOptions.dryRunIsEnabled()
+                ? .dryRun(settings: store)
+                : .live(settings: store)
+        )
         _gate = State(initialValue: .system())
     }
 

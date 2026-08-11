@@ -36,10 +36,18 @@ final class RecordingInputInterceptor: InputInterceptor {
         return true
     }
 
+    func confirmIntercepting() -> Bool { activeScope != nil }
+
     func stopIntercepting() {
         activeScope = nil
         stopCount += 1
     }
+
+    /// 裝上去的攔截跑到一半死掉。
+    ///
+    /// 真實世界裡這會發生：系統把攔截停掉、授權在清潔中被收回。
+    /// 測試用這個表達「事件從現在起不再進到 Wipe 手上」。
+    func loseInterception() { activeScope = nil }
 
     /// 接下來的攔截都裝不上去。
     func breakInterception() { canIntercept = false }

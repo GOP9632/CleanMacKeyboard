@@ -116,3 +116,35 @@ extension KeyboardEventReading {
         self.init(kind: kind, rawFlags: event.modifierFlags.rawValue, keyCode: event.keyCode)
     }
 }
+
+extension KeyboardEventReading {
+    /// 從一個被攔截下來的 CoreGraphics 事件讀出判讀。
+    ///
+    /// 真的攔截起來之後鍵盤事件不會再送到 Wipe 自己身上，解鎖手勢的訊號只能
+    /// 從這裡來（見 `docs/seams.md` 的鍵盤訊號來源）。
+    ///
+    /// 假設是兩邊讀到同一組位元：分左右的資訊住在低 16 位，`CGEventFlags` 與
+    /// `NSEvent.ModifierFlags` 都只是同一個原始值的不同包裝。
+    /// `InterceptedKeyboardReadingTests` 守的是這一頭的轉換沒有把位元弄丟，
+    /// 至於真的鍵盤送進攔截器的值長不長這樣，跟 #3 一樣只有真機驗得到。
+    ///
+    /// 事件種類刻意由呼叫端傳進來而不是問事件自己：攔截回呼收到的種類是系統
+    /// 一起交下來的參數，那才是權威的來源。
+    ///
+    /// 不是鍵盤事件時回傳 `nil`。全輸入鎖底下滑鼠事件也會進到回呼，
+    /// 那些照樣要丟掉，只是不帶任何解鎖手勢需要的訊息。
+    init?(_ event: CGEvent, type: CGEventType) {
+        let kind: Kind
+        switch type {
+        case .flagsChanged: kind = .modifiersChanged
+        case .keyDown: kind = .keyDown
+        case .keyUp: kind = .keyUp
+        default: return nil
+        }
+        self.init(
+            kind: kind,
+            rawFlags: UInt(truncatingIfNeeded: event.flags.rawValue),
+            keyCode: UInt16(truncatingIfNeeded: event.getIntegerValueField(.keyboardEventKeycode))
+        )
+    }
+}

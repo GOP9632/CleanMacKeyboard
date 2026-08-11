@@ -37,6 +37,17 @@ protocol InputInterceptor: AnyObject {
     /// 而鍵盤還活著，正是 Wipe 最不能發生的事。
     func startIntercepting(scope: InterceptionScope) -> Bool
 
+    /// 攔截現在還活著嗎，必要的話順手修一次。
+    ///
+    /// 清潔中每一格問一次。裝上去不等於一直裝著：macOS 會在攔截處理得太慢時
+    /// 自己把它停掉，授權也可能在清潔中被收回。這兩件事都不會有任何錯誤，
+    /// 只有事件重新流向其他 app，也就是鍵盤悄悄復活，而畫面還寫著清潔中。
+    ///
+    /// 實作可以在回答之前先試著把攔截修回來，修得回來就回傳 `true`。
+    /// 回傳 `false` 的話控制器立刻離開清潔中：清潔模式絕不在無法可靠攔截時
+    /// 維持（見 `CONTEXT.md` 的不變條件）。
+    func confirmIntercepting() -> Bool
+
     /// 解除攔截。
     ///
     /// 重複呼叫必須是安全的：控制器寧可多解一次，也不要漏解一次。

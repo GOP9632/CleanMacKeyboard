@@ -76,6 +76,47 @@ struct InterceptionUnavailableTests {
         #expect(harness.clock.isTicking == false)
     }
 
+    @Test("清潔中攔截死掉就立刻退出")
+    func interceptionDyingDuringCleaningExitsImmediately() {
+        // 真的攔截接上去之後多出來的一種失效：攔截裝上去了，跑到一半被系統
+        // 停掉或授權被收回。事件從此不再進到 Wipe 手上，鍵盤悄悄復活，而畫面
+        // 還寫著清潔中。這正是 CONTEXT.md 那條不變條件點名的情況，
+        // 也是 #1 的 user story 45。
+        let harness = CleaningFlowHarness.cleaning(settings: WipeSettings())
+        #expect(harness.controller.stage == .cleaning)
+
+        harness.interceptor.loseInterception()
+        harness.clock.advance(by: CleaningFlowController.tickInterval)
+
+        #expect(harness.controller.stage == .standby)
+        #expect(harness.controller.refusal == .interceptionUnavailable)
+        #expect(harness.clock.isTicking == false)
+    }
+
+    @Test("清潔中攔截死掉時出聲，而且照樣要求解除")
+    func interceptionDyingIsNotSilent() {
+        // 使用者這時正閉著眼睛擦，畫面已經不是他以為的那個了，
+        // 所以這一聲非響不可。
+        let harness = CleaningFlowHarness.cleaning(settings: WipeSettings())
+        let stopsBefore = harness.interceptor.stopCount
+
+        harness.interceptor.loseInterception()
+        harness.clock.advance(by: CleaningFlowController.tickInterval)
+
+        #expect(harness.sound.played.last == .refused)
+        #expect(harness.interceptor.stopCount == stopsBefore + 1)
+    }
+
+    @Test("攔截活著的時候不會誤判成死掉")
+    func aHealthyInterceptionIsLeftAlone() {
+        let harness = CleaningFlowHarness.cleaning(settings: WipeSettings())
+
+        harness.clock.advance(by: 5)
+
+        #expect(harness.controller.stage == .cleaning)
+        #expect(harness.controller.refusal == nil)
+    }
+
     @Test("攔截修好之後再按一次就進得去，理由被清掉")
     func refusalClearsOnceInterceptionWorksAgain() {
         let harness = CleaningFlowHarness(settings: WipeSettings(bufferIsEnabled: false))

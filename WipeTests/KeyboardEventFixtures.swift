@@ -42,6 +42,23 @@ extension NSEvent {
     }
 }
 
+extension CGEvent {
+    /// 測試用的假 CGEvent。
+    ///
+    /// 這是攔截器那一頭收到的事件形式。合成一個事件不需要任何授權，也不會把
+    /// 它送出去，所以測試裡做這件事是安全的；真的裝一個 CGEventTap 才是
+    /// 碰不得的那一步。
+    ///
+    /// 事件本體一律是一次按下，事件**種類**由呼叫端另外傳給判讀。這跟真的
+    /// 攔截回呼是同一個形狀：種類是系統一起交下來的參數，不是從事件本身問的
+    /// （見 `KeyboardEventReading.init(_:type:)`）。
+    static func fake(keyCode: UInt16, rawFlags: UInt) -> CGEvent? {
+        let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true)
+        event?.flags = CGEventFlags(rawValue: UInt64(rawFlags))
+        return event
+    }
+}
+
 /// 測試用的判讀。預設是修飾鍵變化，因為這一票關心的就是修飾鍵。
 func makeReading(
     _ rawFlags: UInt,

@@ -10,8 +10,8 @@ import Observation
 ///
 /// 這一版做的是階段流程本身（待命、準備清潔、清潔中）、逾時解鎖、解鎖手勢、
 /// 闔蓋解鎖、安全輸入模式的拒絕進入與中途退出，以及攔截建立不起來時的拒絕
-/// 進入。真正的攔截是 #11，那張票換掉的只是輸入攔截器那一頭的替身，
-/// 不會改動這裡的骨架。
+/// 進入。真正的攔截（#11）接上去的時候，換掉的只是輸入攔截器那一頭的替身，
+/// 這裡的骨架一行都沒有動（見 `live(settings:)`）。
 @MainActor
 @Observable
 final class CleaningFlowController {
@@ -100,6 +100,36 @@ final class CleaningFlowController {
             secureInput: secureInput,
             interceptor: interceptor,
             sound: sound
+        )
+    }
+
+    /// 真的攔截的組裝。
+    ///
+    /// 跟乾跑那一組差在兩個位置，而且這兩個位置是同一件事的兩面：攔截器換成
+    /// 真的 CGEventTap，鍵盤訊號來源也跟著換。攔截一旦生效，鍵盤事件就不會
+    /// 再送到 Wipe 自己身上，本機監看器一個也收不到，解鎖手勢的訊號只能從
+    /// 攔截器手上那條路進來（見 `docs/seams.md` 的鍵盤訊號來源）。
+    static func live(settings: WipeSettingsStore) -> CleaningFlowController {
+        let interceptor = EventTapInputInterceptor()
+        let keyboard = InterceptedKeyboardSignalSource()
+        // 攔截器丟掉事件之前先把判讀交給鍵盤訊號來源。這裡不會形成循環：
+        // 訊號來源不認識攔截器，兩個都由控制器持有。
+        interceptor.onKeyboardReading = { [weak keyboard] reading in
+            keyboard?.receive(reading)
+        }
+        // 攔截斷過又接回來的時候，空窗期間放開的鍵 Wipe 沒看到。留著那顆鍵
+        // 等於使用者再也解不開（見 `InterceptedKeyboardSignalSource.forgetPressedKeys()`）。
+        interceptor.onInterceptionResumed = { [weak keyboard] in
+            keyboard?.forgetPressedKeys()
+        }
+        return CleaningFlowController(
+            settings: settings,
+            clock: SystemClock(),
+            keyboard: keyboard,
+            machine: SystemMachineSignalSource(),
+            secureInput: SystemSecureInputProbe(),
+            interceptor: interceptor,
+            sound: SystemSoundOutput()
         )
     }
 
@@ -422,6 +452,16 @@ final class CleaningFlowController {
             // 回到待命與出聲由那條路負責。
             refusal = .secureInput(appName: secureInput.responsibleAppName)
             exitCleaning(.secureInput)
+            return
+        }
+        // 攔截還活著嗎。裝上去不等於一直裝著：系統會擅自把它停掉，授權也可能
+        // 在清潔中被收回，而兩件事都不會有任何錯誤，只有鍵盤悄悄復活
+        // （見 `InputInterceptor.confirmIntercepting()`）。
+        if interceptor.confirmIntercepting() == false {
+            // 跟安全輸入模式同一條路：理由記下來，回到待命與出聲交給
+            // `exitCleaning(_:)` 那唯一的出口，攔截一定被解除。
+            refusal = .interceptionUnavailable
+            exitCleaning(.interceptionLost)
             return
         }
         // 手勢再問。它跟逾時撞在同一格時，使用者自己按滿的那條路優先，

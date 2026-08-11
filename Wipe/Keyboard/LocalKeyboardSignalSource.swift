@@ -28,14 +28,14 @@ final class LocalKeyboardSignalSource: KeyboardSignalSource {
     @ObservationIgnored
     private var monitor: Any?
 
-    /// 目前按著的非修飾鍵。用集合而不是一個布林值，是因為兩顆按鍵一起按著時
-    /// 放開其中一顆不算全部放開。
+    /// 按鍵狀態的累加規則。跟攔截那一條路共用同一份
+    /// （見 `KeyboardSignalReader`）。
     ///
     /// 這一份是累加出來的，所以它跟修飾鍵不一樣：按著某顆鍵的時候切到別的 app，
-    /// 那顆鍵的放開事件就收不到，集合會留下一個不存在的按鍵。診斷用不著在意，
-    /// 但清潔流程真的要靠這個訊號時必須處理（見 T3，#4）。
+    /// 那顆鍵的放開事件就收不到，會留下一個不存在的按鍵。診斷用不著在意，
+    /// 清潔流程走的是攔截那一條路，事件不會漏掉。
     @ObservationIgnored
-    private var pressedKeyCodes: Set<UInt16> = []
+    private var reader = KeyboardSignalReader()
 
     var isMonitoring: Bool { monitor != nil }
 
@@ -60,7 +60,7 @@ final class LocalKeyboardSignalSource: KeyboardSignalSource {
         NSEvent.removeMonitor(monitor)
         self.monitor = nil
         signal = .idle
-        pressedKeyCodes = []
+        reader.forgetEverything()
     }
 
     /// 讀一個事件，然後把它原封不動地還回去。
@@ -72,21 +72,7 @@ final class LocalKeyboardSignalSource: KeyboardSignalSource {
     func handle(_ event: NSEvent) -> NSEvent {
         guard let reading = KeyboardEventReading(event) else { return event }
 
-        switch reading.kind {
-        case .keyDown: pressedKeyCodes.insert(reading.keyCode)
-        case .keyUp: pressedKeyCodes.remove(reading.keyCode)
-        case .modifiersChanged: break
-        }
-
-        // 左右 Command 與其他修飾鍵每一次都從旗標重讀，不是自己累加出來的。
-        // 這樣即使漏收了某一次事件（例如切到別的 app 再切回來），
-        // 下一次事件就會把狀態校正回來，不會一直錯下去。
-        signal = KeyboardSignal(
-            leftCommandIsDown: reading.leftCommandIsDown,
-            rightCommandIsDown: reading.rightCommandIsDown,
-            otherModifiersAreDown: reading.otherModifiersAreDown,
-            otherKeyIsDown: pressedKeyCodes.isEmpty == false
-        )
+        signal = reader.read(reading)
 
         // 每一次事件都交出去一次，即使狀態跟上一次一模一樣。解鎖手勢要靠
         // 「這一次事件帶著第三顆鍵」來歸零，只在狀態變了才通知會漏掉按鍵重複。
