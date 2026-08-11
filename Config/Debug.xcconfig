@@ -10,3 +10,14 @@ DEBUG_INFORMATION_FORMAT = dwarf
 MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE
 ENABLE_NS_ASSERTIONS = YES
 COPY_PHASE_STRIP = NO
+
+// 開發建置關掉硬化執行期。Release 那邊維持開著（見 Common.xcconfig）。
+//
+// 硬化執行期會連帶開啟函式庫驗證：process 只准載入「同一個 Team ID」或 Apple
+// 簽的東西。我們的自簽憑證沒有 Team ID，而 Xcode 的開發建置會把程式碼拆進一個
+// Wipe.debug.dylib 再由本體載入，於是那道驗證會擋下自己的 dylib，app 一啟動
+// 就 crash，測試連跑都跑不起來。SwiftUI 預覽注入程式碼也會踩到同一道關。
+//
+// 兩個代價都不痛：開發建置本來就不會交出去，而 Release 沒有那個 dylib，
+// 硬化執行期照樣開著，日後要公證也不必回來改這裡。
+ENABLE_HARDENED_RUNTIME = NO

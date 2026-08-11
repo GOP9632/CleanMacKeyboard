@@ -27,12 +27,19 @@ ARCHS = $(ARCHS_STANDARD)
 // =============================================================
 // 簽章
 // =============================================================
-// 目前是 ad-hoc 簽章（在 Xcode 介面上叫 Sign to Run Locally），純自用夠了。
-// 但 ad-hoc 簽章每次重新編譯都會變，而 macOS 的「輔助使用」授權是綁在簽章上
-// 的，所以接上真正的攔截之前必須先換成穩定的簽章身分，否則開發期會不斷遇到
-// 「明明授權過了卻沒作用」。見 T9（#10）。
-CODE_SIGN_STYLE = Automatic
-CODE_SIGN_IDENTITY = -
+// 用一張自簽的憑證，不是 ad-hoc（Xcode 介面上的 Sign to Run Locally）。
+//
+// 理由是 macOS 的「輔助使用」授權綁在簽章身分上，而 ad-hoc 簽章每次重新編譯
+// 都會換一枚新的，系統會把重編後的 Wipe 當成沒見過的 app，先前打的勾對它
+// 無效。接上真正的攔截之後，那會讓每一次除錯都伴隨「明明授權過了卻沒作用」。
+//
+// 這張憑證要自己建一次，步驟寫在 #10 上。新的機器或重灌之後拿不到憑證，
+// 編譯會失敗並指名找不到這個身分，那就是回去照那份步驟再建一張。
+//
+// 對外分發要換成 Apple 發的 Developer ID 憑證加公證，自簽的擋不掉 Gatekeeper。
+// 目前純自用，見 ADR-0001。
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = Wipe Self-Signed
 DEVELOPMENT_TEAM =
 ENABLE_HARDENED_RUNTIME = YES
 
