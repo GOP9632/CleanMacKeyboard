@@ -16,6 +16,14 @@ enum WipeText: String, CaseIterable {
 
     case mainRefusalSecureInput = "main.refusal.secureInput"
     case mainRefusalSecureInputApp = "main.refusal.secureInput.app"
+    case mainRefusalInterceptionUnavailable = "main.refusal.interceptionUnavailable"
+
+    case authorizationTitle = "authorization.title"
+    case authorizationSteps = "authorization.steps"
+    case authorizationCapability = "authorization.capability"
+    case authorizationPromise = "authorization.promise"
+    case authorizationOpenSettings = "authorization.openSettings"
+    case authorizationAutoDetect = "authorization.autoDetect"
 
     case settingsTabGeneral = "settings.tab.general"
     case settingsTabSound = "settings.tab.sound"

@@ -26,8 +26,16 @@ protocol InputInterceptor: AnyObject {
     /// 目前正在攔截的範圍。`nil` 代表沒有在攔截。
     var activeScope: InterceptionScope? { get }
 
-    /// 以指定範圍開始攔截。
-    func startIntercepting(scope: InterceptionScope)
+    /// 以指定範圍開始攔截。回傳有沒有真的裝上去。
+    ///
+    /// 回傳 `false` 的實作**必須確保自己沒有留下任何半開的攔截**。控制器
+    /// 收到 `false` 之後會再要求解除一次當作第二道保險，但那一道不該被
+    /// 當成正常的清理路徑。
+    ///
+    /// 這個回傳值不是形式上的：授權清單記著的是舊的簽章身分時，系統會說
+    /// 有授權，事件攔截卻裝不上去。那一刻不回報的話，畫面就會顯示清潔中
+    /// 而鍵盤還活著，正是 Wipe 最不能發生的事。
+    func startIntercepting(scope: InterceptionScope) -> Bool
 
     /// 解除攔截。
     ///

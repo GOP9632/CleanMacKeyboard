@@ -9,8 +9,9 @@ import Observation
 /// 拔掉換成替身。
 ///
 /// 這一版做的是階段流程本身（待命、準備清潔、清潔中）、逾時解鎖、解鎖手勢、
-/// 闔蓋解鎖，以及安全輸入模式的拒絕進入與中途退出。真正的攔截是 #11，
-/// 那張票換掉的只是輸入攔截器那一頭的替身，不會改動這裡的骨架。
+/// 闔蓋解鎖、安全輸入模式的拒絕進入與中途退出，以及攔截建立不起來時的拒絕
+/// 進入。真正的攔截是 #11，那張票換掉的只是輸入攔截器那一頭的替身，
+/// 不會改動這裡的骨架。
 @MainActor
 @Observable
 final class CleaningFlowController {
@@ -218,9 +219,10 @@ final class CleaningFlowController {
 
     // MARK: - 誠實回報
     //
-    // 安全輸入模式啟動期間，所有第三方鍵盤攔截都會被系統繞過。此時繼續顯示
-    // 「清潔中」等於對使用者說謊，而使用者正是因為相信畫面才敢閉著眼睛擦。
-    // 寧可擾人，不可製造假象（見 ADR-0002）。
+    // 清潔模式絕不在無法可靠攔截時維持。安全輸入模式啟動期間，所有第三方
+    // 鍵盤攔截都會被系統繞過；攔截器裝不上去的時候，鍵盤根本沒有被鎖住。
+    // 這兩種情況繼續顯示「清潔中」都等於對使用者說謊，而使用者正是因為
+    // 相信畫面才敢閉著眼睛擦。寧可擾人，不可製造假象（見 ADR-0002）。
 
     /// 現在可以放心往下走嗎？不行的話順手把拒絕辦完。
     ///
@@ -229,19 +231,44 @@ final class CleaningFlowController {
     /// 路口都只有一行要寫，不會有人只問不辦。
     private func secureInputIsClear() -> Bool {
         guard secureInput.isSecureInputActive else { return true }
-        reportRefusal()
-        // 準備清潔期間被擋下來的話，這一行同時負責把時鐘停掉。
-        enterStandby()
-        play(.refused)
+        // 是誰造成的只在這一刻問一次。那個查詢比 `isSecureInputActive` 貴得多，
+        // 而清潔中每一格都在問後者。
+        refuse(.secureInput(appName: secureInput.responsibleAppName))
         return false
     }
 
-    /// 記下拒絕的理由。
+    /// 真的把攔截裝上去，裝不上去的話順手把拒絕辦完。
     ///
-    /// 是誰造成的只在這一刻問一次。那個查詢比 `isSecureInputActive` 貴得多，
-    /// 而清潔中每一格都在問後者。
-    private func reportRefusal() {
-        refusal = .secureInput(appName: secureInput.responsibleAppName)
+    /// 跟 `secureInputIsClear()` 同一個形狀：回傳 `false` 時階段一定已經回到
+    /// 待命，呼叫端只要直接 `return`。
+    ///
+    /// 這是整個控制器唯一叫得動攔截器開始攔截的地方，而且刻意跑在 `stage`
+    /// 被改成清潔中**之前**。反過來的話，畫面會有一瞬間說著清潔中而鍵盤
+    /// 還活著。
+    ///
+    /// 走到這裡代表系統說有輔助使用授權，因為沒有授權的話主視窗顯示的是
+    /// 授權引導畫面，使用者根本按不到開始（見 `AuthorizationGate`）。
+    private func startInterceptingOrRefuse() -> Bool {
+        guard interceptor.startIntercepting(scope: settings.interceptionScope) else {
+            // 攔截器可能是裝到一半才失敗的。解除可以重複呼叫，寧可多解一次
+            // 也不要漏解一次（見 `InputInterceptor`）。
+            interceptor.stopIntercepting()
+            refuse(.interceptionUnavailable)
+            return false
+        }
+        return true
+    }
+
+    /// 拒絕進入清潔模式：記下理由、回到待命、出聲。
+    ///
+    /// 每一條拒絕都走這一個函式，三件事才不會有人漏做。尤其是那一聲：
+    /// 使用者可能已經低頭拿抹布了，沒有聲音的拒絕跟沒有拒絕一樣危險。
+    ///
+    /// `enterStandby()` 同時負責在準備清潔期間被擋下來時把時鐘停掉。
+    private func refuse(_ reason: CleaningRefusal) {
+        refusal = reason
+        enterStandby()
+        play(.refused)
     }
 
     // MARK: - 出聲
@@ -328,6 +355,7 @@ final class CleaningFlowController {
     /// 攔截真正生效的是這一刻，而緩衝倒數那幾秒足夠讓一個密碼欄位拿到焦點。
     private func enterCleaning() {
         guard secureInputIsClear() else { return }
+        guard startInterceptingOrRefuse() else { return }
         stage = .cleaning
         // 每一次進入清潔中，手勢都從零開始。這一行是防呆：上一次的進度若被留著，
         // 一進來就會立刻解開，那是這個 app 最不能發生的事。
@@ -339,9 +367,9 @@ final class CleaningFlowController {
         // 從這一刻起才聽機器。進來之前蓋子是開是闔都不算，理由見
         // `MachineSignalSource`。
         machine.start()
-        // 先真的開始攔截，再出聲。那一聲是「可以開始擦了」的許可，
-        // 它響的時候鍵盤必須已經是鎖著的。
-        interceptor.startIntercepting(scope: settings.interceptionScope)
+        // 攔截在進到這個階段之前就已經裝好了（見 `startInterceptingOrRefuse()`），
+        // 所以這一聲響的時候鍵盤必定已經是鎖著的。那一聲是「可以開始擦了」
+        // 的許可，它不可以比事實早。
         play(.locked)
     }
 
@@ -389,7 +417,10 @@ final class CleaningFlowController {
         // 「畫面在說謊」的情況，撞在同一格時要讓使用者聽到的是那一聲，
         // 而不是一句「你解開了」。
         if secureInput.isSecureInputActive {
-            reportRefusal()
+            // 這裡不走 `refuse(_:)`：中途退出必須經過 `exitCleaning(_:)`
+            // 那唯一的出口，才保證攔截一定被解除。理由記下來就好，
+            // 回到待命與出聲由那條路負責。
+            refusal = .secureInput(appName: secureInput.responsibleAppName)
             exitCleaning(.secureInput)
             return
         }

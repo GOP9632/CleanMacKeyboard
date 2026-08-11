@@ -11,8 +11,11 @@ import Foundation
 final class DryRunInputInterceptor: InputInterceptor {
     private(set) var activeScope: InterceptionScope?
 
-    func startIntercepting(scope: InterceptionScope) {
+    /// 乾跑永遠成功。什麼都不做的東西沒有裝不上去的道理，而「裝不上去」
+    /// 那條路在真的攔截接上來之前不需要有人假裝（見 #11）。
+    func startIntercepting(scope: InterceptionScope) -> Bool {
         activeScope = scope
+        return true
     }
 
     func stopIntercepting() {

@@ -13,4 +13,12 @@ enum CleaningRefusal: Equatable {
     /// 安全輸入模式啟動中。
     /// - Parameter appName: 造成它的 app，查不出來時是 `nil`。
     case secureInput(appName: String?)
+
+    /// 輸入攔截建立不起來。
+    ///
+    /// 走到這裡代表系統說有輔助使用授權（不然主視窗顯示的是授權引導畫面，
+    /// 根本按不到開始），但攔截器就是裝不上去。最常見的原因是授權清單記著的
+    /// 是舊的簽章身分，而那件事只有重開 Wipe 解得掉，所以畫面上這一句話
+    /// 要直接叫使用者重開。
+    case interceptionUnavailable
 }

@@ -15,10 +15,17 @@ struct WipeApp: App {
     /// 換掉的只有這一行裡的那個替身（見 docs/seams.md）。
     @State private var controller: CleaningFlowController
 
+    /// 輔助使用授權的閘門。主視窗裡放圓環還是授權引導畫面由它決定。
+    ///
+    /// 它跟控制器並排，不是控制器的一部分：授權是「畫面要不要出現」的閘門，
+    /// 發生在流程之前（見 `AuthorizationGate`）。
+    @State private var gate: AuthorizationGate
+
     init() {
         let store = WipeSettingsStore()
         _store = State(initialValue: store)
         _controller = State(initialValue: .dryRun(settings: store))
+        _gate = State(initialValue: .system())
     }
 
     // 這裡刻意沒有 tint。強調色由資源目錄裡的全域強調色資源決定
@@ -28,7 +35,7 @@ struct WipeApp: App {
         // 用 Window 而不是 WindowGroup：Wipe 只有一個常駐視窗，
         // 不需要「新增視窗」，也不需要多開一份。
         Window(WipeText.appName.localizedKey, id: Self.mainWindowID) {
-            MainWindowView(controller: controller)
+            MainWindowView(controller: controller, gate: gate)
         }
         .windowResizability(.contentSize)
 

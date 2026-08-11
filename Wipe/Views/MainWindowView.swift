@@ -8,6 +8,9 @@ import SwiftUI
 struct MainWindowView: View {
     let controller: CleaningFlowController
 
+    /// 有沒有拿到輔助使用授權。沒有的話這個視窗裡放的是別的東西。
+    let gate: AuthorizationGate
+
     @Environment(\.locale) private var locale
 
     private enum Layout {
@@ -15,7 +18,34 @@ struct MainWindowView: View {
         static let spacing: CGFloat = 20
     }
 
+    /// 還沒授權時整個視窗換成引導畫面，而不是在圓環旁邊加一句提示。
+    ///
+    /// 沒有授權的圓環是一顆可以按但按了沒用的按鈕，那對非工程背景的使用者
+    /// 來說就是「這個 app 壞了」（見 #9）。授權拿到的那一刻這裡自己會換回
+    /// 圓環，不需要重開 app，因為 `AuthorizationGate` 一直在問。
+    @ViewBuilder
     var body: some View {
+        if showsGuide {
+            AuthorizationGuideView { gate.openSettings() }
+        } else {
+            ring
+        }
+    }
+
+    /// 現在該顯示引導畫面嗎？
+    ///
+    /// 只有待命時才換。清潔模式期間就算授權在這一刻被收回也不動畫面：
+    /// 使用者正閉著眼睛擦機器，這時把整個視窗換掉等於抽掉他唯一的狀態來源。
+    /// 那條路由攔截那一頭說話（見 `CleaningRefusal.interceptionUnavailable`），
+    /// 而清潔模式一結束，這裡自然就換成引導畫面了。
+    ///
+    /// 準備清潔也算在「不換」裡：倒數跑到一半畫面被抽掉，使用者不會知道
+    /// 那個倒數還在不在。
+    private var showsGuide: Bool {
+        !gate.isAuthorized && controller.stage == .standby
+    }
+
+    private var ring: some View {
         VStack(spacing: Layout.spacing) {
             RingView(phase: ringPhase) { controller.activateRing() }
             timeoutLabel
@@ -93,6 +123,10 @@ struct MainWindowView: View {
             guard let appName else { return WipeText.mainRefusalSecureInput.localized(in: locale) }
             let format = WipeText.mainRefusalSecureInputApp.localized(in: locale)
             return String(format: format, locale: locale, appName)
+        case .interceptionUnavailable:
+            // 這一條只有在授權已經給了的情況下才走得到，所以話直接說到底：
+            // 重開 Wipe。再叫使用者去看一次授權設定只會讓他更迷路。
+            return WipeText.mainRefusalInterceptionUnavailable.localized(in: locale)
         }
     }
 
@@ -116,5 +150,5 @@ struct MainWindowView: View {
 }
 
 #Preview {
-    MainWindowView(controller: .dryRun())
+    MainWindowView(controller: .dryRun(), gate: .granted())
 }

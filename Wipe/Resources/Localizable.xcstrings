@@ -19,6 +19,114 @@
         }
       }
     },
+    "authorization.autoDetect" : {
+      "comment" : "授權引導畫面底下的說明，告訴使用者打完勾不必重開 app。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave Wipe open. It notices the moment you turn it on, and this screen becomes the ring again."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe 開著就好。你一打開授權它就會發現，這個畫面會自己變回圓環。"
+          }
+        }
+      }
+    },
+    "authorization.capability" : {
+      "comment" : "授權引導畫面上誠實說明這個授權讓 Wipe 拿到什麼能力。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility lets Wipe see every keystroke, click, and trackpad gesture on this Mac, and discard them before any app receives them."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輔助使用授權讓 Wipe 看得到這台 Mac 上的每一次按鍵、點擊與觸控板動作，並且在其他 app 收到之前把它們丟掉。"
+          }
+        }
+      }
+    },
+    "authorization.openSettings" : {
+      "comment" : "授權引導畫面上那顆按鈕，按了直接開啟系統設定的對應頁面。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open System Settings"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟系統設定"
+          }
+        }
+      }
+    },
+    "authorization.promise" : {
+      "comment" : "授權引導畫面上說明 Wipe 拿這個授權做什麼、不做什麼。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe only discards events while cleaning mode is on. It never records what you type, never stores it, and never sends anything anywhere."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe 只在清潔模式期間把事件丟掉。它不記錄你打了什麼，不存下來，也不會傳到任何地方。"
+          }
+        }
+      }
+    },
+    "authorization.steps" : {
+      "comment" : "授權引導畫面上的操作步驟，要講明是哪個授權、去哪裡打勾。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open System Settings, go to Privacy & Security › Accessibility, and turn on Wipe."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打開「系統設定」，到「隱私權與安全性 › 輔助使用」，把 Wipe 打開。"
+          }
+        }
+      }
+    },
+    "authorization.title" : {
+      "comment" : "授權引導畫面的標題。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe needs your permission"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe 需要你的授權"
+          }
+        }
+      }
+    },
     "diagnostics.headline" : {
       "comment" : "診斷視窗的標題行，說明這個畫面要回答什麼問題。",
       "extractionState" : "manual",
@@ -231,6 +339,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "鍵盤診斷"
+          }
+        }
+      }
+    },
+    "main.refusal.interceptionUnavailable" : {
+      "comment" : "拒絕進入清潔模式的理由：授權已經給了，攔截還是建立不起來。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe has permission but still cannot block input. Quit Wipe and open it again."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wipe 拿到授權了，還是建立不了攔截。請結束 Wipe 再重新開啟。"
           }
         }
       }
