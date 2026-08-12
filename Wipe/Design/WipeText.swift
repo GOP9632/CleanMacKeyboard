@@ -14,6 +14,9 @@ enum WipeText: String, CaseIterable {
 
     case mainTimeoutRemaining = "main.timeout.remaining"
 
+    case mainScopeKeyboard = "main.scope.keyboard"
+    case mainScopeAllInput = "main.scope.allInput"
+
     case mainRefusalSecureInput = "main.refusal.secureInput"
     case mainRefusalSecureInputApp = "main.refusal.secureInput.app"
     case mainRefusalInterceptionUnavailable = "main.refusal.interceptionUnavailable"

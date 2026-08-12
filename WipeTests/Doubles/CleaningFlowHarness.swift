@@ -17,6 +17,14 @@ struct CleaningFlowHarness {
     let controller: CleaningFlowController
 
     init(settings: WipeSettings = WipeSettings()) {
+        self.init(store: WipeSettingsStore(settings))
+    }
+
+    /// 從一個設定 store 開始，而不是一組值。
+    ///
+    /// 要在清潔中改設定的測試需要它：控制器每次用到設定都問同一個 store 拿
+    /// 最新的值，所以測試手上得握著那個 store 才改得動。
+    init(store: WipeSettingsStore) {
         let clock = TestClock()
         let keyboard = FakeKeyboardSignalSource()
         let machine = FakeMachineSignalSource()
@@ -30,7 +38,7 @@ struct CleaningFlowHarness {
         self.interceptor = interceptor
         self.sound = sound
         self.controller = CleaningFlowController(
-            settings: settings,
+            settings: store,
             clock: clock,
             keyboard: keyboard,
             machine: machine,

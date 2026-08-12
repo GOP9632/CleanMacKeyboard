@@ -397,6 +397,42 @@
         }
       }
     },
+    "main.scope.allInput" : {
+      "comment" : "清潔模式期間顯示目前的攔截範圍是全輸入鎖。範圍的名字加上它的代價：游標也停住，所以沒有滑鼠可以求救。必須短到只佔一行，長度有測試量著（見 SecondaryLineLayoutTests）。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All input locked, pointer frozen"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全輸入鎖，游標也停住"
+          }
+        }
+      }
+    },
+    "main.scope.keyboard" : {
+      "comment" : "清潔模式期間顯示目前的攔截範圍是鍵盤鎖。範圍的名字加上那條還留著的求救路徑。必須短到只佔一行，長度有測試量著（見 SecondaryLineLayoutTests）。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keyboard locked, trackpad works"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鍵盤鎖，觸控板仍然可用"
+          }
+        }
+      }
+    },
     "main.timeout.remaining" : {
       "comment" : "清潔模式期間顯示的逾時剩餘時間，%@ 是 分:秒。刻意放在圓環外面，不佔用圓環。",
       "extractionState" : "manual",

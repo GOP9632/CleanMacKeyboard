@@ -33,6 +33,24 @@ struct InterceptionScopeEventsTests {
         static let otherMouseDown = 25
         static let otherMouseUp = 26
         static let otherMouseDragged = 27
+
+        /// 觸控板的多指手勢。`CGEventType` 一個都沒有，編號來自
+        /// `NSEvent.EventType`（見 `InterceptionScope.gestureMask`）。
+        static let rotate = 18
+        static let beginGesture = 19
+        static let endGesture = 20
+        static let gesture = 29
+        static let magnify = 30
+        static let swipe = 31
+        static let smartMagnify = 32
+        static let pressure = 34
+        static let directTouch = 37
+
+        /// 全輸入鎖要監看的多指手勢，全部。
+        static let gestures = [
+            rotate, beginGesture, endGesture, gesture,
+            magnify, swipe, smartMagnify, pressure, directTouch,
+        ]
     }
 
     private static func mask(_ bits: [Int]) -> CGEventMask {
@@ -67,6 +85,13 @@ struct InterceptionScopeEventsTests {
         }
     }
 
+    @Test("鍵盤鎖也不碰觸控板的多指手勢", arguments: Bit.gestures)
+    func keyboardScopeLeavesTheGesturesAlone(_ bit: Int) {
+        // 手勢跟游標是同一條求救路徑的一部分。鍵盤鎖多攔了它們，使用者就會
+        // 在一個號稱只鎖鍵盤的模式底下發現觸控板半死不活。
+        #expect(InterceptionScope.keyboard.eventMask & (1 << CGEventMask(bit)) == 0)
+    }
+
     @Test("全輸入鎖連游標移動一起監看")
     func allInputScopeWatchesThePointerToo() {
         #expect(InterceptionScope.allInput.eventMask == Self.mask([
@@ -77,7 +102,17 @@ struct InterceptionScopeEventsTests {
             Bit.mouseMoved,
             Bit.leftMouseDragged, Bit.rightMouseDragged, Bit.otherMouseDragged,
             Bit.scrollWheel,
-        ]))
+        ] + Bit.gestures))
+    }
+
+    @Test("全輸入鎖連觸控板的多指手勢一起監看", arguments: Bit.gestures)
+    func allInputScopeWatchesTheGesturesToo(_ bit: Int) {
+        // 少了這些位元，抹布掃過觸控板照樣會縮放、旋轉、切換桌面。游標定住而
+        // 桌面在跳，那不是使用者以為的「全輸入鎖」。
+        //
+        // 這裡守的是遮罩有沒有帶著那些位元。真的用抹布掃過去有沒有反應只有
+        // 真機驗得到，那是 #12 的驗收項目。
+        #expect(InterceptionScope.allInput.eventMask & (1 << CGEventMask(bit)) != 0)
     }
 
     @Test("全輸入鎖涵蓋鍵盤鎖攔的每一件事")

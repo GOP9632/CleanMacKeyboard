@@ -25,6 +25,14 @@ final class CleaningFlowController {
     /// （見 `enterStandby()`），要盯著它就得為了一段說明文字一直佔著時鐘。
     private(set) var refusal: CleaningRefusal?
 
+    /// 現在真的被攔住的範圍。`nil` 代表沒有在攔截。
+    ///
+    /// 畫面顯示的必須是這一個，不是 `settings.interceptionScope`。兩者在清潔中
+    /// 會分岔：鍵盤鎖底下觸控板還活著，使用者有辦法在清潔中打開設定把範圍改成
+    /// 全輸入鎖，而已經裝上去的攔截不會跟著變。那一刻顯示設定裡那一個，畫面就
+    /// 會說游標已經定住，而使用者手上的游標正在動。
+    private(set) var activeInterceptionScope: InterceptionScope?
+
     /// 目前的設定值。
     ///
     /// 控制器只讀不寫：設定是使用者從設定視窗改的，改動走
@@ -279,13 +287,18 @@ final class CleaningFlowController {
     /// 走到這裡代表系統說有輔助使用授權，因為沒有授權的話主視窗顯示的是
     /// 授權引導畫面，使用者根本按不到開始（見 `AuthorizationGate`）。
     private func startInterceptingOrRefuse() -> Bool {
-        guard interceptor.startIntercepting(scope: settings.interceptionScope) else {
+        // 範圍在這一行讀一次就定了，之後清潔中一律以這個值為準。設定在清潔中
+        // 被改掉也不追：跑到一半換範圍等於重裝一次攔截，那是在使用者閉著眼睛
+        // 擦機器的時候抽掉他腳下的地板。
+        let scope = settings.interceptionScope
+        guard interceptor.startIntercepting(scope: scope) else {
             // 攔截器可能是裝到一半才失敗的。解除可以重複呼叫，寧可多解一次
             // 也不要漏解一次（見 `InputInterceptor`）。
             interceptor.stopIntercepting()
             refuse(.interceptionUnavailable)
             return false
         }
+        activeInterceptionScope = scope
         return true
     }
 
@@ -360,6 +373,9 @@ final class CleaningFlowController {
 
     private func enterStandby() {
         stage = .standby
+        // 待命一定沒有在攔截。每一條路徑都經過這裡，包括拒絕進入與離開清潔中
+        // 那唯一的出口，所以這一行就是「畫面上那句話絕不留在待命」的保證。
+        activeInterceptionScope = nil
         clock.stopTicking()
         // 待命不需要鍵盤。手勢只在清潔中有意義，其他時候放手，
         // 順便把按著的鍵忘乾淨。
