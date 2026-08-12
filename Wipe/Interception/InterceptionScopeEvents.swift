@@ -29,8 +29,14 @@ extension InterceptionScope {
 
     /// 觸控板與滑鼠，包括多指手勢。
     ///
-    /// 游標移動（`.mouseMoved`）與三種拖曳都要在裡面，否則抹布掃過觸控板時
-    /// 游標照樣會跑，而全輸入鎖承諾的正是游標定住。
+    /// 游標移動（`.mouseMoved`）與三種拖曳都要在裡面，否則其他 app 會繼續收到
+    /// 「滑鼠移到這裡了」，選單與按鈕會跟著亮起來。
+    ///
+    /// **游標本身還是會動。**#12 在真機上驗過：這一層攔得下事件，沒有 app 收得到
+    /// 它們，點擊與手勢完全沒有反應，但螢幕上那個箭頭照樣跟著手指跑。游標的位置
+    /// 是視窗伺服器直接從 HID 那一層畫的，不經過這個攔截點。要真的把箭頭定住得
+    /// 用別的機制，那是另一張票的事；畫面上的說明也因此不承諾游標會停
+    /// （見 `InterceptionScope.statusText`）。
     private static let pointerMask = mask(of: [
         CGEventType.leftMouseDown, .leftMouseUp,
         .rightMouseDown, .rightMouseUp,
@@ -58,9 +64,11 @@ extension InterceptionScope {
 
     /// 觸控板的多指手勢：旋轉、縮放、滑動、用力按、直接觸碰。
     ///
-    /// 這些跟游標移動是同一件事的兩半。少了它們，全輸入鎖底下游標定住了，
+    /// 這些跟點擊是同一件事的兩半。少了它們，全輸入鎖底下點擊沒有反應，
     /// 抹布掃過觸控板照樣會縮放頁面、切換桌面，而使用者以為自己已經把觸控板
     /// 關掉了。那就是製造假象（見 `CONTEXT.md` 的不變條件）。
+    ///
+    /// #12 在真機上驗過這一整組真的有效：點擊與手勢完全沒有反應。
     ///
     /// 跟媒體鍵同一個處境：`CGEventType` 一個成員都沒有，編號從
     /// `NSEvent.EventType` 拿。
@@ -70,7 +78,6 @@ extension InterceptionScope {
     /// `.directTouch`。多攔幾種在清潔模式期間沒有代價，那幾分鐘裡這些事件
     /// 本來就一律丟掉；漏掉的代價卻是安靜地漏掉一種手勢。
     ///
-    /// 真的用抹布掃過去有沒有反應只有真機驗得到，那是 #12 的驗收項目。
     private static let gestureMask = mask(of: [
         NSEvent.EventType.gesture,
         .magnify,

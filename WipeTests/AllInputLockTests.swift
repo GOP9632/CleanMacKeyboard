@@ -3,7 +3,7 @@ import Testing
 
 @testable import Wipe
 
-/// 全輸入鎖：鍵盤、觸控板與滑鼠一起被攔截，游標定住。
+/// 全輸入鎖：鍵盤、觸控板與滑鼠一起被攔截，點擊與手勢都沒有作用。
 ///
 /// 「有沒有攔到」是另一份測試的事（見 `InterceptionScopeEventsTests`）。
 /// 這一份守的是這個範圍獨有的兩個風險：

@@ -398,19 +398,19 @@
       }
     },
     "main.scope.allInput" : {
-      "comment" : "清潔模式期間顯示目前的攔截範圍是全輸入鎖。範圍的名字加上它的代價：游標也停住，所以沒有滑鼠可以求救。必須短到只佔一行，長度有測試量著（見 SecondaryLineLayoutTests）。",
+      "comment" : "清潔模式期間顯示目前的攔截範圍是全輸入鎖。範圍的名字加上它的代價：滑鼠按不動任何東西，沒有滑鼠可以求救。刻意不說游標停住，真機上游標還是會跟著移動。必須短到只佔一行，長度有測試量著（見 SecondaryLineLayoutTests）。",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "All input locked, pointer frozen"
+            "value" : "All input locked, clicks do nothing"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "全輸入鎖，游標也停住"
+            "value" : "全輸入鎖，點擊與手勢都無效"
           }
         }
       }
