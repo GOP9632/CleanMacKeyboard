@@ -5,8 +5,9 @@ import ApplicationServices
 ///
 /// 「現在有沒有」問的是 `AXIsProcessTrusted()`，那是系統唯一的官方答案。
 ///
-/// 這裡只問「輔助使用」。#1 提到部分情況另需「輸入監控」，但那個授權要不要、
-/// 什麼時候要，只有真的去建立 event tap 之後才知道，所以留給 #11。
+/// 這裡只問「輔助使用」。#1 提到部分情況另需「輸入監控」，#11 接上真的
+/// event tap 之後在真機上驗過了：光有「輔助使用」就攔得下鍵盤，
+/// 所以 Wipe 不問第二個授權。
 ///
 /// 這一整個檔案沒有自動化測試，跟 `SystemSecureInputProbe` 同一個理由：
 /// 測試那一頭是 `FakeAccessibilityAuthorization`，這裡剩下的只是問系統與
