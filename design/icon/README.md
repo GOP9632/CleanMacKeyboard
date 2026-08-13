@@ -9,7 +9,7 @@
 | `Wipe.iconset/` | 十個尺寸的 PNG，接進 Xcode Assets 時用這組 |
 | `Wipe.icns` | 打包好的 icns，要在 Finder 或 Dock 上直接看效果時用 |
 | `contact-sheet.png` | 各尺寸對照表，最下面把 16 與 32 像素放大 8 倍，用來檢查小尺寸的可讀性 |
-| `DrawIcon.swift` | 產生器。這組圖示是用程式畫的，要改比例或顏色從這裡改，不要去修 PNG |
+| `DrawIcon.swift` | 產生器。這組圖示是用程式畫的，要改比例或版面從這裡改，不要去修 PNG。顏色不在這裡，見下面「顏色」 |
 
 ## 重新產生
 
@@ -19,25 +19,24 @@
 swiftc -O DrawIcon.swift -o drawicon && ./drawicon "$PWD/out" AL
 ```
 
-第一個參數是輸出目錄，第二個是鍵帽上的簽名。會同時產出 `graphite` 與 `cyan` 兩個變體，
-目前採用的是 `graphite`。打包 icns：
+第一個參數是輸出目錄，第二個是鍵帽上的簽名。產出的是 `Wipe.iconset/` 與
+`contact-sheet.png`。打包 icns：
 
 ```bash
-iconutil -c icns out/graphite/Wipe.iconset -o out/graphite/Wipe.icns
+iconutil -c icns out/Wipe.iconset -o out/Wipe.icns
 ```
 
 ## 顏色
 
-青色取自 app 的 `CleaningCyan` 色票（見 `Wipe/Design/WipeColor.swift`，`WipeColor.accent`
-就是 `cleaning`）。圖示不自創色值：
+青色不寫在產生器裡。執行時直接讀
+`Wipe/Resources/Assets.xcassets/Colors/CleaningCyan.colorset/Contents.json`，
+淺色值畫在淺色鍵帽表面上的暫停符號，深色值畫在簡化版的深色底上。
 
-| 用途 | 色值 | 來源 |
-|---|---|---|
-| 淺色鍵帽表面上的暫停符號 | `#0A93A8` | CleaningCyan 淺色模式值 |
-| 深色底上的暫停符號（16、32 像素簡化版） | `#35D3E6` | CleaningCyan 深色模式值 |
+**app 改了青色時，重跑一次產生器、把切圖複製回資源目錄就對齊了，不需要改這裡的程式。**
+對齊方向是圖示去對齊 app，不是反過來，見 `docs/adr/0003-fixed-accent-colour.md`。
 
-**色值若在 app 裡改動，這裡要跟著改。** 對齊方向是圖示去對齊 app，不是反過來。
-見 `docs/adr/0003-fixed-accent-colour.md`。
+色票讀不到時產生器直接中止，不會退回內建值。那種退路產出的是一組看起來正常、
+顏色卻跟 app 對不上的圖，比失敗難發現。
 
 ## 分尺寸策略
 
@@ -61,8 +60,11 @@ iconutil -c icns out/graphite/Wipe.iconset -o out/graphite/Wipe.icns
   位置固定讓大小圖之間有視覺連續性。
 - **全程扁平風格，鍵帽厚度只用兩層色階，沒有材質光影。** 曾經試過寫實 3D 風格（抹布蓋在鍵盤上），
   失敗原因是織紋、柔光、漸層背景在縮小後全部糊掉，而且多物件的尺度差會讓小的那個在圖示尺寸下消失。
-- **青色是點綴，不是主色。** `cyan` 變體（青底）已經試過並否決，原因是暫停符號的青色跟底色太接近，
-  符號失去對比，整體變成一片青。
+- **這一組就是定案。** #15 原本要的是使用者用 imagegen 產的素材，主題是抹布蓋在鍵盤按鍵上，
+  素材規格還寫明無文字。實際交付的是程式畫的鍵帽，而且刻了簽名。這兩處與票上的文字不符，
+  使用者在 2026-08-13 確認採用現在這一組。不需要再回頭做 imagegen 那個方向。
+- **青色是點綴，不是主色。** 青底的變體已經試過並否決，原因是暫停符號的青色跟底色太接近，
+  符號失去對比，整體變成一片青。產生器裡不留那條路，只留採用的深石墨底。
 
 ## 已知取捨
 

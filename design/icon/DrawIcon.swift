@@ -5,8 +5,8 @@
 //   鍵帽本來就是會刻字的東西，所以簽名不是貼上去的 logo，而是用了鍵帽本身的語言。
 // - 暫停符號的兩根粗直條是極小尺寸下唯一還讀得懂的形狀，所以它在每個尺寸都在，
 //   位置也固定，讓大小圖之間有視覺連續性。
-// - 青色取自 app 的 CleaningCyan 色票（#0A93A8 淺色，#35D3E6 深色），
-//   兩個值都是 app 實際在用的，不自創色值。
+// - 青色不寫在這個檔案裡，執行時直接讀 app 的 CleaningCyan 色票。
+//   圖示去對齊 app，不是反過來，見 docs/adr/0003-fixed-accent-colour.md。
 //
 // 分尺寸策略（#15 驗收條件要求小尺寸另做簡化版，不從大圖縮小）：
 // - 16、32 像素：只留暫停符號，幾何以整數像素對齊，避免糊掉。
@@ -20,14 +20,6 @@ import Foundation
 
 // MARK: - 顏色
 
-/// app 的青色強調色，取自 Assets 裡的 CleaningCyan 色票。
-enum Cyan {
-    /// 淺色模式值，用在淺色鍵帽表面上。
-    static let onLight = RGB(0x0A, 0x93, 0xA8)
-    /// 深色模式值，用在深色底上（簡化版的暫停符號）。
-    static let onDark = RGB(0x35, 0xD3, 0xE6)
-}
-
 struct RGB {
     let r, g, b: CGFloat
     init(_ r: Int, _ g: Int, _ b: Int) {
@@ -35,36 +27,94 @@ struct RGB {
         self.g = CGFloat(g) / 255
         self.b = CGFloat(b) / 255
     }
-    func cg(_ alpha: CGFloat = 1) -> CGColor {
+    func cgColor(alpha: CGFloat = 1) -> CGColor {
         CGColor(srgbRed: r, green: g, blue: b, alpha: alpha)
     }
 }
 
-/// 底色方案。兩個變體讓使用者比較青色該當點綴還是當主色。
-enum Backdrop {
-    /// 深石墨底。青色只在暫停符號上，佔比小。
-    case graphite
-    /// 深青底。品牌識別強，但青色成為主色。
-    case cyan
+/// 一個色票的淺色與深色兩個值。
+struct ColorSet {
+    let light: RGB
+    let dark: RGB
+}
 
-    var top: RGB {
-        switch self {
-        case .graphite: return RGB(0x2E, 0x34, 0x3C)
-        case .cyan: return RGB(0x0C, 0x7E, 0x90)
-        }
+/// 讀 app 資源目錄裡的色票。
+///
+/// 這個產生器刻意不留自己的一份色值。色票是唯一的來源，改了色票重跑一次就對齊，
+/// 兩份色值各自漂移的情況不會發生。讀不到就直接中止，因為悄悄退回內建值產出的
+/// 是一組看起來正常、顏色卻跟 app 對不上的圖。
+func loadColorSet(named name: String) -> ColorSet {
+    // 從目前的工作目錄一路往上找資源目錄，所以在 repo 裡的哪一層執行都可以。
+    // 不用 #filePath 定位：那個值是編譯時命令列上寫的字串，README 那行
+    // `swiftc -O DrawIcon.swift` 給的是相對路徑，換一個工作目錄就指到別的地方。
+    let relativePath = "Wipe/Resources/Assets.xcassets/Colors/\(name).colorset/Contents.json"
+
+    func fail(_ reason: String) -> Never {
+        FileHandle.standardError.write(
+            "讀不到色票 \(name)：\(reason)\n請在 repo 裡面執行，會往上找 \(relativePath)\n"
+                .data(using: .utf8)!
+        )
+        exit(1)
     }
-    var bottom: RGB {
-        switch self {
-        case .graphite: return RGB(0x15, 0x18, 0x1C)
-        case .cyan: return RGB(0x06, 0x45, 0x51)
+
+    var directory = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+    var found: URL?
+    while found == nil {
+        let candidate = directory.appendingPathComponent(relativePath)
+        if FileManager.default.fileExists(atPath: candidate.path) {
+            found = candidate
+            break
         }
+        let parent = directory.deletingLastPathComponent()
+        if parent.path == directory.path { break }
+        directory = parent
     }
-    var name: String {
-        switch self {
-        case .graphite: return "graphite"
-        case .cyan: return "cyan"
+
+    guard let url = found else { fail("從工作目錄往上找不到這個檔案") }
+    guard let data = try? Data(contentsOf: url) else { fail("檔案讀不開") }
+    guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+          let entries = root["colors"] as? [[String: Any]]
+    else { fail("格式不是預期的 colorset") }
+
+    func rgb(from entry: [String: Any]) -> RGB? {
+        guard let color = entry["color"] as? [String: Any],
+              let components = color["components"] as? [String: String]
+        else { return nil }
+        func channel(_ key: String) -> Int? {
+            guard let raw = components[key] else { return nil }
+            if raw.hasPrefix("0x") { return Int(raw.dropFirst(2), radix: 16) }
+            return Int(raw)
         }
+        guard let r = channel("red"), let g = channel("green"), let b = channel("blue") else {
+            return nil
+        }
+        return RGB(r, g, b)
     }
+
+    func isDark(_ entry: [String: Any]) -> Bool {
+        guard let appearances = entry["appearances"] as? [[String: Any]] else { return false }
+        return appearances.contains { $0["value"] as? String == "dark" }
+    }
+
+    guard let lightEntry = entries.first(where: { !isDark($0) }), let light = rgb(from: lightEntry) else {
+        fail("找不到淺色的值")
+    }
+    guard let darkEntry = entries.first(where: { isDark($0) }), let dark = rgb(from: darkEntry) else {
+        fail("找不到深色的值")
+    }
+    return ColorSet(light: light, dark: dark)
+}
+
+/// app 的青色強調色。淺色值用在淺色鍵帽表面上，深色值用在簡化版的深色底上。
+let cyan = loadColorSet(named: "CleaningCyan")
+
+/// 底色。深石墨，讓青色維持在點綴的份量。
+///
+/// 青底的變體試過並否決，理由是暫停符號的青色與底色太接近，符號失去對比，
+/// 整體變成一片青。那是已經做完的取捨，所以這裡只留採用的那一組。
+enum Backdrop {
+    static let top = RGB(0x2E, 0x34, 0x3C)
+    static let bottom = RGB(0x15, 0x18, 0x1C)
 }
 
 /// 鍵帽配色。表面近白，側面稍深，只用兩層色階表示厚度，不做寫實光影。
@@ -78,8 +128,11 @@ enum Keycap {
 // MARK: - 幾何
 
 /// Superellipse 路徑。Apple 的圖示圓角是連續曲率，不是圓弧，
-/// 用 n=5 的 superellipse 逼近會比 CGPath 的圓角矩形接近。
-func superellipsePath(in rect: CGRect, n: CGFloat = 5, samples: Int = 720) -> CGPath {
+/// superellipse 逼近會比 CGPath 的圓角矩形接近。`n` 越大角越方。
+///
+/// 這是逼近，不是 macOS 真正的 squircle：真正的形狀在角與邊之間還有一段直邊。
+func superellipsePath(in rect: CGRect, n: CGFloat) -> CGPath {
+    let samples = 720
     let path = CGMutablePath()
     let a = rect.width / 2
     let b = rect.height / 2
@@ -102,13 +155,14 @@ func roundedPath(_ rect: CGRect, radius: CGFloat) -> CGPath {
     CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil)
 }
 
-func fill(_ ctx: CGContext, _ path: CGPath, gradientFrom top: RGB, to bottom: RGB) {
+/// 用由下往上的直線漸層填滿一個路徑。
+func fillWithVerticalGradient(_ ctx: CGContext, _ path: CGPath, from top: RGB, to bottom: RGB) {
     ctx.saveGState()
     ctx.addPath(path)
     ctx.clip()
     let box = path.boundingBox
     let space = CGColorSpaceCreateDeviceRGB()
-    let colors = [bottom.cg(), top.cg()] as CFArray
+    let colors = [bottom.cgColor(), top.cgColor()] as CFArray
     guard let gradient = CGGradient(colorsSpace: space, colors: colors, locations: [0, 1]) else {
         ctx.restoreGState()
         return
@@ -188,8 +242,8 @@ func drawSignature(_ ctx: CGContext, text: String, center: CGPoint, capHeight: C
     ctx.restoreGState()
 }
 
-func drawIcon(size: Int, backdrop: Backdrop, signature: String) -> CGImage? {
-    let s = CGFloat(size)
+func drawIcon(size: Int, signature: String) -> CGImage? {
+    let side = CGFloat(size)
     guard let ctx = CGContext(
         data: nil,
         width: size,
@@ -202,38 +256,38 @@ func drawIcon(size: Int, backdrop: Backdrop, signature: String) -> CGImage? {
 
     ctx.setAllowsAntialiasing(true)
     ctx.interpolationQuality = .high
-    ctx.clear(CGRect(x: 0, y: 0, width: s, height: s))
+    ctx.clear(CGRect(x: 0, y: 0, width: side, height: side))
 
     let level = detail(forPixelSize: size)
 
     // 容器。macOS 圖示格線是 1024 畫布裡 824 的圖形，也就是四邊各留 100。
     // 小尺寸改用整數像素邊距，避免半像素邊緣。
-    let inset: CGFloat = level == .minimal ? max(1, (s * 0.0977).rounded()) : s * 0.0977
-    let container = CGRect(x: inset, y: inset, width: s - inset * 2, height: s - inset * 2)
+    let inset: CGFloat = level == .minimal ? max(1, (side * 0.0977).rounded()) : side * 0.0977
+    let container = CGRect(x: inset, y: inset, width: side - inset * 2, height: side - inset * 2)
     let containerPath = level == .minimal
         ? superellipsePath(in: container, n: 3.4)
         : superellipsePath(in: container, n: 4.0)
-    fill(ctx, containerPath, gradientFrom: backdrop.top, to: backdrop.bottom)
+    fillWithVerticalGradient(ctx, containerPath, from: Backdrop.top, to: Backdrop.bottom)
 
     switch level {
     case .minimal:
         // 以整數像素定幾何，16 像素下也要有清楚的兩根條與中間的縫。
-        let barW = max(2, (s * 0.21875).rounded())
-        let gap = max(2, (s * 0.125).rounded())
-        let barH = max(4, (s * 0.5625).rounded())
+        let barW = max(2, (side * 0.21875).rounded())
+        let gap = max(2, (side * 0.125).rounded())
+        let barH = max(4, (side * 0.5625).rounded())
         let totalW = barW * 2 + gap
-        let originX = ((s - totalW) / 2).rounded()
-        let originY = ((s - barH) / 2).rounded()
-        ctx.setFillColor(Cyan.onDark.cg())
+        let originX = ((side - totalW) / 2).rounded()
+        let originY = ((side - barH) / 2).rounded()
+        ctx.setFillColor(cyan.dark.cgColor())
         for x in [originX, originX + barW + gap] {
             // 小尺寸的圓角只做極小值，太圓會讓 3 像素寬的條看起來像圓點。
-            let radius: CGFloat = s >= 32 ? (barW * 0.28).rounded() : 0
+            let radius: CGFloat = side >= 32 ? (barW * 0.28).rounded() : 0
             ctx.addPath(roundedPath(CGRect(x: x, y: originY, width: barW, height: barH), radius: radius))
             ctx.fillPath()
         }
 
     case .mid, .full:
-        let unit = s / 1024
+        let unit = side / 1024
 
         // 鍵帽。先畫往下位移的深色形狀當側面厚度，再蓋上表面。
         let capSide: CGFloat = 574 * unit
@@ -241,16 +295,16 @@ func drawIcon(size: Int, backdrop: Backdrop, signature: String) -> CGImage? {
         let capCenterY: CGFloat = 528 * unit
         let depth: CGFloat = 26 * unit
         let faceRect = CGRect(
-            x: (s - capSide) / 2,
+            x: (side - capSide) / 2,
             y: capCenterY - capSide / 2,
             width: capSide,
             height: capSide
         )
-        ctx.setFillColor(Keycap.side.cg())
+        ctx.setFillColor(Keycap.side.cgColor())
         ctx.addPath(roundedPath(faceRect.offsetBy(dx: 0, dy: -depth), radius: capRadius))
         ctx.fillPath()
-        fill(ctx, roundedPath(faceRect, radius: capRadius),
-             gradientFrom: Keycap.faceTop, to: Keycap.faceBottom)
+        fillWithVerticalGradient(ctx, roundedPath(faceRect, radius: capRadius),
+                                 from: Keycap.faceTop, to: Keycap.faceBottom)
 
         // 暫停符號放在鍵帽表面偏上，簽名放下方。
         // 這正是真實 Mac 鍵帽的排版：主符號在上，次要字符在下。
@@ -258,12 +312,12 @@ func drawIcon(size: Int, backdrop: Backdrop, signature: String) -> CGImage? {
         let pauseCenterY = hasSignature ? 598 * unit : capCenterY
         drawPause(
             ctx,
-            center: CGPoint(x: s / 2, y: pauseCenterY),
+            center: CGPoint(x: side / 2, y: pauseCenterY),
             barWidth: 72 * unit,
             barHeight: 208 * unit,
             gap: 52 * unit,
             radius: 24 * unit,
-            color: Cyan.onLight.cg()
+            color: cyan.light.cgColor()
         )
 
         if hasSignature {
@@ -272,9 +326,9 @@ func drawIcon(size: Int, backdrop: Backdrop, signature: String) -> CGImage? {
             drawSignature(
                 ctx,
                 text: signature,
-                center: CGPoint(x: s / 2, y: 378 * unit),
+                center: CGPoint(x: side / 2, y: 378 * unit),
                 capHeight: 82 * unit,
-                color: Keycap.signature.cg()
+                color: Keycap.signature.cgColor()
             )
         }
     }
@@ -295,7 +349,7 @@ func writePNG(_ image: CGImage, to url: URL) {
 
 /// 對照表。上排深底、下排淺底顯示實際像素大小，最下面把 16 與 32 放大 8 倍，
 /// 讓小尺寸的可讀性可以真的被檢查，而不是靠猜。
-func writeContactSheet(backdrop: Backdrop, signature: String, to url: URL) {
+func writeContactSheet(signature: String, to url: URL) {
     let sizes = [16, 32, 64, 128, 256, 512]
     let padding = 40
     let gutter = 48
@@ -318,14 +372,14 @@ func writeContactSheet(backdrop: Backdrop, signature: String, to url: URL) {
     ) else { return }
 
     // 背景切兩半，左右各半沒有意義，改成整體中性灰，兩排各自畫底色方塊。
-    ctx.setFillColor(RGB(0x8A, 0x8A, 0x8E).cg())
+    ctx.setFillColor(RGB(0x8A, 0x8A, 0x8E).cgColor())
     ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
 
     func label(_ text: String, at point: CGPoint, size: CGFloat, color: RGB) {
         let font = NSFont.monospacedSystemFont(ofSize: size, weight: .medium)
         let attributed = NSAttributedString(string: text, attributes: [
             .font: font,
-            .foregroundColor: NSColor(cgColor: color.cg()) ?? .black,
+            .foregroundColor: NSColor(cgColor: color.cgColor()) ?? .black,
         ])
         let line = CTLineCreateWithAttributedString(attributed)
         ctx.textPosition = point
@@ -335,11 +389,11 @@ func writeContactSheet(backdrop: Backdrop, signature: String, to url: URL) {
     var y = height - padding - 512 - labelSpace
 
     // 深底一排
-    ctx.setFillColor(RGB(0x1C, 0x1C, 0x1E).cg())
+    ctx.setFillColor(RGB(0x1C, 0x1C, 0x1E).cgColor())
     ctx.fill(CGRect(x: 0, y: y - gutter / 2, width: width, height: 512 + labelSpace + gutter))
     var x = padding
     for size in sizes {
-        guard let image = drawIcon(size: size, backdrop: backdrop, signature: signature) else { continue }
+        guard let image = drawIcon(size: size, signature: signature) else { continue }
         ctx.draw(image, in: CGRect(x: x, y: y, width: size, height: size))
         label("\(size)", at: CGPoint(x: x, y: y - 24), size: 18, color: RGB(0xE8, 0xE8, 0xEA))
         x += max(size, 64) + gutter
@@ -347,11 +401,11 @@ func writeContactSheet(backdrop: Backdrop, signature: String, to url: URL) {
 
     // 淺底一排
     y -= rowHeight
-    ctx.setFillColor(RGB(0xF2, 0xF2, 0xF4).cg())
+    ctx.setFillColor(RGB(0xF2, 0xF2, 0xF4).cgColor())
     ctx.fill(CGRect(x: 0, y: y - gutter / 2, width: width, height: 512 + labelSpace + gutter))
     x = padding
     for size in sizes {
-        guard let image = drawIcon(size: size, backdrop: backdrop, signature: signature) else { continue }
+        guard let image = drawIcon(size: size, signature: signature) else { continue }
         ctx.draw(image, in: CGRect(x: x, y: y, width: size, height: size))
         label("\(size)", at: CGPoint(x: x, y: y - 24), size: 18, color: RGB(0x3A, 0x3A, 0x3C))
         x += max(size, 64) + gutter
@@ -359,12 +413,12 @@ func writeContactSheet(backdrop: Backdrop, signature: String, to url: URL) {
 
     // 放大檢查排。關掉插值，看到的就是實際像素。
     y -= zoomRowHeight + 20
-    ctx.setFillColor(RGB(0x55, 0x55, 0x58).cg())
+    ctx.setFillColor(RGB(0x55, 0x55, 0x58).cgColor())
     ctx.fill(CGRect(x: 0, y: y - gutter / 2, width: width, height: zoomRowHeight + gutter))
     ctx.interpolationQuality = .none
     x = padding
     for size in [16, 32] {
-        guard let image = drawIcon(size: size, backdrop: backdrop, signature: signature) else { continue }
+        guard let image = drawIcon(size: size, signature: signature) else { continue }
         let side = size * zoomFactor
         ctx.draw(image, in: CGRect(x: x, y: y, width: side, height: side))
         label("\(size) px 放大 \(zoomFactor)x", at: CGPoint(x: x, y: y - 24), size: 18, color: RGB(0xE8, 0xE8, 0xEA))
@@ -396,17 +450,14 @@ let iconsetEntries: [(name: String, size: Int)] = [
     ("icon_512x512@2x", 1024),
 ]
 
-for backdrop in [Backdrop.graphite, Backdrop.cyan] {
-    let iconset = outputRoot.appendingPathComponent("\(backdrop.name)/Wipe.iconset")
-    try? FileManager.default.createDirectory(at: iconset, withIntermediateDirectories: true)
-    for entry in iconsetEntries {
-        guard let image = drawIcon(size: entry.size, backdrop: backdrop, signature: signature) else { continue }
-        writePNG(image, to: iconset.appendingPathComponent("\(entry.name).png"))
-    }
-    writeContactSheet(
-        backdrop: backdrop,
-        signature: signature,
-        to: outputRoot.appendingPathComponent("\(backdrop.name)/contact-sheet.png")
-    )
-    print("完成 \(backdrop.name)")
+let iconset = outputRoot.appendingPathComponent("Wipe.iconset")
+try? FileManager.default.createDirectory(at: iconset, withIntermediateDirectories: true)
+for entry in iconsetEntries {
+    guard let image = drawIcon(size: entry.size, signature: signature) else { continue }
+    writePNG(image, to: iconset.appendingPathComponent("\(entry.name).png"))
 }
+writeContactSheet(
+    signature: signature,
+    to: outputRoot.appendingPathComponent("contact-sheet.png")
+)
+print("完成，輸出在 \(outputRoot.path)")
