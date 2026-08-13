@@ -29,13 +29,13 @@ struct MainWindowVisibilityTests {
         let window = Self.makeWindow()
         let coordinator = MainWindowVisibility.Coordinator()
 
-        coordinator.apply(engaged: true, to: window)
+        coordinator.apply(raised: true, blocksDisplaySleep: true, to: window)
 
         #expect(window.level == CleaningVisibility.raisedWindowLevel)
         #expect(window.collectionBehavior.contains(.canJoinAllSpaces))
         #expect(window.collectionBehavior.contains(.fullScreenAuxiliary))
 
-        coordinator.apply(engaged: false, to: window)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: window)
     }
 
     @Test("回到待命還原成原本那一份")
@@ -45,8 +45,8 @@ struct MainWindowVisibilityTests {
         let originalBehavior = window.collectionBehavior
         let coordinator = MainWindowVisibility.Coordinator()
 
-        coordinator.apply(engaged: true, to: window)
-        coordinator.apply(engaged: false, to: window)
+        coordinator.apply(raised: true, blocksDisplaySleep: true, to: window)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: window)
 
         #expect(window.level == originalLevel)
         #expect(window.collectionBehavior == originalBehavior)
@@ -62,9 +62,9 @@ struct MainWindowVisibilityTests {
         let originalBehavior = window.collectionBehavior
         let coordinator = MainWindowVisibility.Coordinator()
 
-        coordinator.apply(engaged: true, to: window)
-        coordinator.apply(engaged: true, to: window)
-        coordinator.apply(engaged: false, to: window)
+        coordinator.apply(raised: true, blocksDisplaySleep: true, to: window)
+        coordinator.apply(raised: true, blocksDisplaySleep: true, to: window)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: window)
 
         #expect(window.level == originalLevel)
         #expect(window.collectionBehavior == originalBehavior)
@@ -75,9 +75,9 @@ struct MainWindowVisibilityTests {
         // app 剛啟動時那個看不見的視圖還沒進到視窗裡，`window` 是 nil。
         // 那一刻階段一定是待命，所以什麼都不用做，但不可以當掉。
         let coordinator = MainWindowVisibility.Coordinator()
-        coordinator.apply(engaged: false, to: nil)
-        coordinator.apply(engaged: true, to: nil)
-        coordinator.apply(engaged: false, to: nil)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: nil)
+        coordinator.apply(raised: true, blocksDisplaySleep: true, to: nil)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: nil)
     }
 
     @Test("掛在 SwiftUI 底下時真的接得到視窗")
@@ -88,16 +88,18 @@ struct MainWindowVisibilityTests {
         // 不會發生。
         let window = Self.makeWindow()
         let originalLevel = window.level
-        let hosting = NSHostingView(rootView: MainWindowVisibility(stage: .standby))
+        let hosting = NSHostingView(
+            rootView: MainWindowVisibility(stage: .standby, presentation: .mainWindow)
+        )
         window.contentView = hosting
         hosting.layoutSubtreeIfNeeded()
         #expect(window.level == originalLevel)
 
-        hosting.rootView = MainWindowVisibility(stage: .cleaning)
+        hosting.rootView = MainWindowVisibility(stage: .cleaning, presentation: .mainWindow)
         hosting.layoutSubtreeIfNeeded()
         #expect(window.level == CleaningVisibility.raisedWindowLevel)
 
-        hosting.rootView = MainWindowVisibility(stage: .standby)
+        hosting.rootView = MainWindowVisibility(stage: .standby, presentation: .mainWindow)
         hosting.layoutSubtreeIfNeeded()
         #expect(window.level == originalLevel)
     }
@@ -109,11 +111,11 @@ struct MainWindowVisibilityTests {
         let frame = window.frame
         let coordinator = MainWindowVisibility.Coordinator()
 
-        coordinator.apply(engaged: true, to: window)
+        coordinator.apply(raised: true, blocksDisplaySleep: true, to: window)
 
         #expect(window.frame == frame)
 
-        coordinator.apply(engaged: false, to: window)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: window)
     }
 
     @Test("清潔中關不掉也縮不小")
@@ -124,14 +126,14 @@ struct MainWindowVisibilityTests {
         let window = Self.makeWindow()
         let coordinator = MainWindowVisibility.Coordinator()
 
-        coordinator.apply(engaged: true, to: window)
+        coordinator.apply(raised: true, blocksDisplaySleep: true, to: window)
 
         #expect(window.styleMask.contains(.closable) == false)
         #expect(window.styleMask.contains(.miniaturizable) == false)
         // 標題列還在，視窗看起來還是同一個視窗，只是那兩顆按鈕變灰。
         #expect(window.styleMask.contains(.titled))
 
-        coordinator.apply(engaged: false, to: window)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: window)
     }
 
     @Test("回到待命那兩顆按鈕就回來了")
@@ -140,8 +142,8 @@ struct MainWindowVisibilityTests {
         let originalStyleMask = window.styleMask
         let coordinator = MainWindowVisibility.Coordinator()
 
-        coordinator.apply(engaged: true, to: window)
-        coordinator.apply(engaged: false, to: window)
+        coordinator.apply(raised: true, blocksDisplaySleep: true, to: window)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: window)
 
         #expect(window.styleMask == originalStyleMask)
     }

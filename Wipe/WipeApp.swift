@@ -21,17 +21,29 @@ struct WipeApp: App {
     /// 發生在流程之前（見 `AuthorizationGate`）。
     @State private var gate: AuthorizationGate
 
+    /// 遮蔽層。它跟控制器並排，不是主視窗的一部分。
+    ///
+    /// 放在這裡而不是掛在主視窗底下，是因為遮蔽層會把主視窗整個蓋住，而被
+    /// 蓋住的視窗會停止更新。收回遮蔽層的路徑不可以穿過被它蓋住的那個視窗
+    /// （理由寫在 `OverlayPresenter`）。
+    @State private var overlay: OverlayPresenter
+
     init() {
         let store = WipeSettingsStore()
         _store = State(initialValue: store)
         // 乾跑與真攔截的取捨只在這一行上做，而且只在啟動時做一次：
         // 跑到一半換掉攔截器，等於在使用者閉著眼睛擦機器的時候抽掉他腳下的地板。
-        _controller = State(
-            initialValue: WipeLaunchOptions.dryRunIsEnabled()
-                ? .dryRun(settings: store)
-                : .live(settings: store)
-        )
+        let controller = WipeLaunchOptions.dryRunIsEnabled()
+            ? CleaningFlowController.dryRun(settings: store)
+            : CleaningFlowController.live(settings: store)
+        _controller = State(initialValue: controller)
         _gate = State(initialValue: .system())
+
+        // 這裡就開始盯著控制器，不等任何視窗出現。遮蔽層要不要鋪只看階段與
+        // 設定，跟主視窗有沒有在畫無關。
+        let overlay = OverlayPresenter(controller: controller)
+        overlay.start()
+        _overlay = State(initialValue: overlay)
     }
 
     // 這裡刻意沒有 tint。強調色由資源目錄裡的全域強調色資源決定

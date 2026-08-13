@@ -20,6 +20,12 @@ struct MainWindowVisibility: NSViewRepresentable {
     /// 目前階段。它變了 SwiftUI 才會來叫 `updateNSView`。
     let stage: CleaningStage
 
+    /// 使用者選的畫面呈現方式。
+    ///
+    /// 置頂要看它，阻止螢幕變暗不看：選了遮蔽層的時候主視窗不做任何處置，
+    /// 自然被蓋住（見 `CleaningVisibility.mainWindowIsRaised(during:presentation:)`）。
+    let presentation: ScreenPresentation
+
     func makeNSView(context: Context) -> NSView {
         // 一個零尺寸、什麼都不畫的視圖。它唯一的用途是站在視圖階層裡，
         // 好讓這裡問得到 `window`。
@@ -33,7 +39,8 @@ struct MainWindowVisibility: NSViewRepresentable {
     /// 進來時視圖還沒接上視窗，下一格就會自己補上。
     func updateNSView(_ nsView: NSView, context: Context) {
         context.coordinator.apply(
-            engaged: CleaningVisibility.isEngaged(during: stage),
+            raised: CleaningVisibility.mainWindowIsRaised(during: stage, presentation: presentation),
+            blocksDisplaySleep: CleaningVisibility.displaySleepIsBlocked(during: stage),
             to: nsView.window
         )
     }
@@ -41,7 +48,7 @@ struct MainWindowVisibility: NSViewRepresentable {
     static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
         // 視圖被拆掉的時候一定要還原。少了這一行，視窗留在置頂層級、螢幕留著
         // 那份不變暗的宣告，而已經沒有人有辦法把它們收回來了。
-        coordinator.apply(engaged: false, to: nsView.window)
+        coordinator.apply(raised: false, blocksDisplaySleep: false, to: nsView.window)
     }
 
     func makeCoordinator() -> Coordinator {
@@ -73,10 +80,11 @@ struct MainWindowVisibility: NSViewRepresentable {
             let styleMask: NSWindow.StyleMask
         }
 
-        func apply(engaged: Bool, to window: NSWindow?) {
-            // 兩件事一起開、一起關。它們是同一個承諾的兩半：畫面一直看得見。
-            sleepBlock.setEngaged(engaged)
-            if engaged {
+        /// 兩件事分開說，因為它們的條件不一樣：阻止螢幕變暗兩種畫面呈現底下
+        /// 都成立，主視窗的置頂只在主視窗那一種成立。
+        func apply(raised: Bool, blocksDisplaySleep: Bool, to window: NSWindow?) {
+            sleepBlock.setEngaged(blocksDisplaySleep)
+            if raised {
                 raise(window)
             } else {
                 restore()
