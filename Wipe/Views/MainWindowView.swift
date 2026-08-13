@@ -18,13 +18,22 @@ struct MainWindowView: View {
         static let spacing: CGFloat = 20
     }
 
+    /// 視窗裡放什麼由授權決定，而清潔模式期間這個視窗要一直看得見。
+    ///
+    /// 置頂與阻止螢幕變暗掛在最外層，跟裡面放圓環還是引導畫面無關：那兩件事
+    /// 是視窗本身的處置，換了內容也不該中斷（見 `MainWindowVisibility`）。
+    var body: some View {
+        content
+            .background(MainWindowVisibility(stage: controller.stage))
+    }
+
     /// 還沒授權時整個視窗換成引導畫面，而不是在圓環旁邊加一句提示。
     ///
     /// 沒有授權的圓環是一顆可以按但按了沒用的按鈕，那對非工程背景的使用者
     /// 來說就是「這個 app 壞了」（見 #9）。授權拿到的那一刻這裡自己會換回
     /// 圓環，不需要重開 app，因為 `AuthorizationGate` 一直在問。
     @ViewBuilder
-    var body: some View {
+    private var content: some View {
         if showsGuide {
             AuthorizationGuideView { gate.openSettings() }
         } else {
