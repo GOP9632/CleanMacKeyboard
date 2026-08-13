@@ -52,10 +52,14 @@ struct OverlayVisibilityTests {
         }
     }
 
-    @Test("遮蔽層跟著每一個 Space 走，也跟得進全螢幕 app")
-    func overlayFollowsEverySpace() {
-        // 跟主視窗置頂同一個理由：全螢幕 app 各自佔一個 Space，沒有這兩個旗標
-        // 的視窗留在原本那個 Space，使用者切過去就看到沒被蓋住的畫面。
+    @Test("遮蔽層帶著跨 Space 與跨全螢幕 app 的那兩個旗標")
+    func overlayCarriesTheCrossSpaceFlags() {
+        // 這兩個旗標讓遮蔽層有資格出現在別的 Space 與全螢幕 app 上面。
+        //
+        // 它們**沒有**讓遮蔽層跟過去每一個桌面：#14 在真機上驗過，鍵盤鎖底下
+        // 用多指手勢切到另一個桌面，那個桌面沒有被蓋住。這個行為是接受的，
+        // 理由見 `OverlayVisibility.collectionBehavior`。所以這個測試只守
+        // 「旗標有帶著」，不承諾「每一個桌面都被蓋住」。
         #expect(OverlayVisibility.collectionBehavior.contains(.canJoinAllSpaces))
         #expect(OverlayVisibility.collectionBehavior.contains(.fullScreenAuxiliary))
     }

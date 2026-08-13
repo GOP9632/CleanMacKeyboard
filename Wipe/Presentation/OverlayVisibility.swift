@@ -36,10 +36,19 @@ enum OverlayVisibility {
     /// 這裡直接給一組固定值，不像主視窗那樣從原本那一份算出來：遮蔽層的視窗
     /// 是這個 app 自己開的，開完就是這個樣子，沒有「原本」可以保留。
     ///
-    /// - `canJoinAllSpaces` 與 `fullScreenAuxiliary`：全螢幕 app 各自佔一個
-    ///   Space，少了這兩個，使用者切過去就看到一個沒被蓋住的畫面。
+    /// - `canJoinAllSpaces` 與 `fullScreenAuxiliary`：讓這個視窗有資格出現在
+    ///   別的 Space 與全螢幕 app 上面。
     /// - `stationary`：切換 Space 的時候不要跟著滑動。
     /// - `ignoresCycle`：不要出現在 Cmd + \` 的視窗循環裡。
+    ///
+    /// **這兩個旗標沒有讓遮蔽層跟過去每一個桌面。**#14 在真機上驗過：鍵盤鎖
+    /// 底下觸控板是活的，用多指手勢切到另一個桌面，那個桌面沒有被蓋住。
+    /// 換句話說遮蔽層守得住它所在的那個桌面，守不住「使用者把桌面切走」。
+    ///
+    /// 這個行為是接受的，理由是切得走的前提是觸控板還活著，而那正是鍵盤鎖
+    /// 自己說明白的取捨（見 `CONTEXT.md` 的攔截範圍）。真的要連這條路一起
+    /// 堵住就是切到全輸入鎖，手勢在那底下沒有作用。所以畫面上不承諾隱私
+    /// 遮蔽在鍵盤鎖底下滴水不漏。
     static let collectionBehavior: NSWindow.CollectionBehavior = [
         .canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle,
     ]
