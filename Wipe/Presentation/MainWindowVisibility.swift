@@ -59,9 +59,9 @@ struct MainWindowVisibility: NSViewRepresentable {
 
         /// 被置頂著的那個視窗，加上它原本長什麼樣子。
         ///
-        /// `nil` 代表現在沒有置頂中，也代表沒有東西要還原。三個值永遠一起設、
-        /// 一起清空，所以綁成一個；分成三個 optional 的話，還原那一段就得在
-        /// 三個「不可能是 nil」的地方各拆一次包。
+        /// `nil` 代表現在沒有置頂中，也代表沒有東西要還原。這幾個值永遠一起設、
+        /// 一起清空，所以綁成一個；分成好幾個 optional 的話，還原那一段就得在
+        /// 好幾個「不可能是 nil」的地方各拆一次包。
         private var raised: RaisedWindow?
 
         private struct RaisedWindow {
@@ -70,6 +70,7 @@ struct MainWindowVisibility: NSViewRepresentable {
             weak var window: NSWindow?
             let level: NSWindow.Level
             let behavior: NSWindow.CollectionBehavior
+            let styleMask: NSWindow.StyleMask
         }
 
         func apply(engaged: Bool, to window: NSWindow?) {
@@ -91,15 +92,18 @@ struct MainWindowVisibility: NSViewRepresentable {
             raised = RaisedWindow(
                 window: window,
                 level: window.level,
-                behavior: window.collectionBehavior
+                behavior: window.collectionBehavior,
+                styleMask: window.styleMask
             )
             window.level = CleaningVisibility.raisedWindowLevel
             window.collectionBehavior = CleaningVisibility.raisedCollectionBehavior(
                 from: window.collectionBehavior
             )
-            // 這裡刻意不碰 `setFrame`、`styleMask`、`orderFront` 或任何跟外觀
-            // 有關的東西。清潔模式期間主視窗維持原來的樣子和位置，不變形也不
-            // 隱藏（見 #1 的 user story 16）；層級調高本身就足以讓它浮上來。
+            window.styleMask = CleaningVisibility.raisedStyleMask(from: window.styleMask)
+            // 這裡刻意不碰 `setFrame` 與 `orderFront`。清潔模式期間主視窗維持
+            // 原來的大小和位置（見 #1 的 user story 16），層級調高本身就足以
+            // 讓它浮上來。樣式只動關閉與縮小那兩顆按鈕，理由見
+            // `CleaningVisibility.raisedStyleMask(from:)`。
         }
 
         /// 還原成進入清潔模式之前那一份。
@@ -108,6 +112,7 @@ struct MainWindowVisibility: NSViewRepresentable {
             guard let raised, let window = raised.window else { return }
             window.level = raised.level
             window.collectionBehavior = raised.behavior
+            window.styleMask = raised.styleMask
         }
     }
 }

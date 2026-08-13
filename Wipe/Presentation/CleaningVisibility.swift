@@ -34,6 +34,22 @@ enum CleaningVisibility {
     /// 的不變條件），而逾時一到畫面就還原了。
     static let raisedWindowLevel: NSWindow.Level = .screenSaver
 
+    /// 置頂期間的視窗樣式，從原本那一份算出來。
+    ///
+    /// 差別只有關閉與縮小這兩顆按鈕，它們在清潔模式期間會變灰。鍵盤鎖底下
+    /// 觸控板還活著，使用者點得到它們；視窗一旦消失，畫面上就沒有狀態可看了，
+    /// 而鍵盤還鎖著，他只能等逾時。那正是這一票要防的處境。
+    ///
+    /// 用樣式而不是把按鈕本身停用，是因為關掉視窗的路不只那顆按鈕：選單裡的
+    /// 「關閉」與 Dock 圖示都走得到。樣式是同一個開關的上游，三條路一起關。
+    ///
+    /// 按鈕變灰確實讓視窗的外觀變了一點，跟「外觀不變」有張力
+    /// （見 #1 的 user story 16）。取捨是刻意的：那幾分鐘裡整個 app 本來就不
+    /// 接受操作，而一顆會讓狀態消失的按鈕跟這一票的目的直接衝突。
+    static func raisedStyleMask(from original: NSWindow.StyleMask) -> NSWindow.StyleMask {
+        original.subtracting([.closable, .miniaturizable])
+    }
+
     /// 置頂期間的視窗集合行為，從原本那一份算出來。
     ///
     /// 只調層級是不夠的。全螢幕 app 各自佔一個 Space，而普通視窗只待在自己

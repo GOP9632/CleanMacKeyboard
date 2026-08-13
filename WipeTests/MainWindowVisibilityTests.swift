@@ -104,18 +104,45 @@ struct MainWindowVisibilityTests {
 
     @Test("清潔中不動視窗的大小與位置")
     func leavesTheFrameAlone() {
-        // 清潔模式期間主視窗維持原來的樣子和位置，不變形也不隱藏
-        // （見 #1 的 user story 16）。
+        // 清潔模式期間主視窗維持原來的大小和位置（見 #1 的 user story 16）。
         let window = Self.makeWindow()
         let frame = window.frame
-        let styleMask = window.styleMask
         let coordinator = MainWindowVisibility.Coordinator()
 
         coordinator.apply(engaged: true, to: window)
 
         #expect(window.frame == frame)
-        #expect(window.styleMask == styleMask)
 
         coordinator.apply(engaged: false, to: window)
+    }
+
+    @Test("清潔中關不掉也縮不小")
+    func cannotBeClosedOrMiniaturizedWhileCleaning() {
+        // 鍵盤鎖底下觸控板還活著，使用者點得到那兩顆按鈕。視窗一旦消失，
+        // 畫面上就沒有狀態可看了，而鍵盤還鎖著，他只能等逾時。那正是這一票
+        // 要防的處境。
+        let window = Self.makeWindow()
+        let coordinator = MainWindowVisibility.Coordinator()
+
+        coordinator.apply(engaged: true, to: window)
+
+        #expect(window.styleMask.contains(.closable) == false)
+        #expect(window.styleMask.contains(.miniaturizable) == false)
+        // 標題列還在，視窗看起來還是同一個視窗，只是那兩顆按鈕變灰。
+        #expect(window.styleMask.contains(.titled))
+
+        coordinator.apply(engaged: false, to: window)
+    }
+
+    @Test("回到待命那兩顆按鈕就回來了")
+    func restoresTheButtons() {
+        let window = Self.makeWindow()
+        let originalStyleMask = window.styleMask
+        let coordinator = MainWindowVisibility.Coordinator()
+
+        coordinator.apply(engaged: true, to: window)
+        coordinator.apply(engaged: false, to: window)
+
+        #expect(window.styleMask == originalStyleMask)
     }
 }

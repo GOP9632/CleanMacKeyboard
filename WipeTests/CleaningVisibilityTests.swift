@@ -70,6 +70,32 @@ struct CleaningVisibilityTests {
         #expect(raised.contains(.moveToActiveSpace) == false)
     }
 
+    @Test("置頂時關掉那兩顆會讓視窗消失的按鈕")
+    func raisedStyleMaskDropsTheVanishingButtons() {
+        // 鍵盤鎖底下觸控板還活著，使用者點得到關閉鈕與縮小鈕。視窗一旦消失，
+        // 畫面上就沒有狀態可看了，而鍵盤還鎖著，他只能等逾時。
+        //
+        // 這一項的代價是那兩顆按鈕在清潔模式期間會變灰，也就是視窗的外觀確實
+        // 變了一點，跟「外觀不變」有張力。那幾分鐘裡整個 app 本來就不接受操作，
+        // 而一顆會讓狀態消失的按鈕跟這一票的目的直接衝突。
+        let raised = CleaningVisibility.raisedStyleMask(
+            from: [.titled, .closable, .miniaturizable, .resizable]
+        )
+        #expect(raised.contains(.closable) == false)
+        #expect(raised.contains(.miniaturizable) == false)
+    }
+
+    @Test("置頂時仍然是一個有標題列的普通視窗")
+    func raisedStyleMaskKeepsTheRest() {
+        // 拿掉的只有那兩顆按鈕。標題列與其他樣式都留著，視窗看起來還是
+        // 同一個視窗（見 #1 的 user story 16）。
+        let raised = CleaningVisibility.raisedStyleMask(
+            from: [.titled, .closable, .miniaturizable, .resizable]
+        )
+        #expect(raised.contains(.titled))
+        #expect(raised.contains(.resizable))
+    }
+
     @Test("原本那些不相干的旗標留著")
     func raisedBehaviorKeepsTheRest() {
         // 清潔模式期間主視窗的外觀、大小、位置都不變（見 #1 的 user story 16）。
