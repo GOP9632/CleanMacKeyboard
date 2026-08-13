@@ -31,9 +31,12 @@ INFOPLIST_KEY_NSHumanReadableCopyright =
 // AccentColor 的色值必須與 CleaningCyan 一致，有測試守著。
 ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor
 
-// app 圖示是另一張票（T14，#15）。在那之前刻意不指定
-// ASSETCATALOG_COMPILER_APPICON_NAME，先用系統預設圖示，
-// 這樣資源目錄裡不需要放一個空的 appiconset。
+// === app 圖示 ===
+// 這一行決定 Dock、Finder 與輔助使用授權清單上顯示的是 Wipe 自己的圖示，
+// 還是系統那個通用的空白 app 圖示。少了它，資源目錄裡就算放了圖也不會被採用。
+// 圖示的原始素材與產生器在 design/icon/，那裡的 README 寫了各尺寸的設計取捨。
+// 圖示上的青色必須與 CleaningCyan 一致，有測試守著。
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 
 // 本地化：英文是開發語言，繁體中文由字串目錄提供，介面跟隨系統語言。
 SWIFT_EMIT_LOC_STRINGS = YES
